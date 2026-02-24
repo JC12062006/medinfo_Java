@@ -77,8 +77,8 @@ public class Model {
      */
     public static void insertUtilisateur(User u) {
 
-        String requete = "INSERT INTO utilisateur " +
-                "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
+        String requete = "INSERT INTO utilisateur" +
+                "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES(" +
                 "'" + u.getNom() + "', " +
                 "'" + u.getPrenom() + "', " +
                 "'" + u.getEmail() + "', " +
