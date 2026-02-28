@@ -21,6 +21,7 @@ public class VueGenerale extends JFrame implements ActionListener {
 
     private JPanel panelAccueil = new JPanel();
     private JLabel lbBienvenue = new JLabel();
+    private JButton btAjouterMedecin = new JButton("Ajouter un médecin");
 
     public VueGenerale(User unUser) {
 
@@ -39,12 +40,14 @@ public class VueGenerale extends JFrame implements ActionListener {
         // -------------------------
         this.panelMenu.setBounds(200, 10, 500, 40);
         this.panelMenu.setBackground(Color.cyan);
-        this.panelMenu.setLayout(new GridLayout(1, 1, 10, 10));
+        this.panelMenu.setLayout(new GridLayout(1, 2, 10, 10));
+        this.panelMenu.add(this.btAjouterMedecin);
 
         this.panelMenu.add(this.btDeconnexion);
         this.add(this.panelMenu);
 
         this.btDeconnexion.addActionListener(this);
+        this.btAjouterMedecin.addActionListener(this);
 
         // -------------------------
         // PANEL ACCUEIL
@@ -66,6 +69,10 @@ public class VueGenerale extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == this.btAjouterMedecin) {
+            new VueAjouterMedecin();
+        }
 
         if (e.getSource() == this.btDeconnexion) {
             this.dispose();
