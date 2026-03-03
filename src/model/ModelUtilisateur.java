@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 import controller.User;
 
-public class Model {
+public class ModelUtilisateur {
 
     // Connexion à la base MedInfo
     private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
@@ -73,8 +73,8 @@ public class Model {
     }
 
     /**
-     * Inscription d'un utilisateur (secrétaire)
-     */
+     -------------Inscription d'un utilisateur (secrétaire)----------------
+     
     public static void insertUtilisateur(User u) {
 
         String requete = "INSERT INTO utilisateur " +
@@ -98,4 +98,5 @@ public class Model {
             System.out.println("Erreur d'exécution : " + requete);
         }
     }
+    */
 }

@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import controller.Controller;
+import controller.ControllerUtilisateur;
 import controller.User;
 
 public class VueConnexion extends JFrame implements ActionListener, KeyListener {
@@ -25,7 +25,7 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
 
     private JButton btAnnuler = new JButton("Annuler");
     private JButton btValider = new JButton("Connexion");
-    private JButton btInscription = new JButton("Créer un compte");
+    //private JButton btInscription = new JButton("Créer un compte");
 
     private JTextField txtEmail = new JTextField();
     private JPasswordField txtMdp = new JPasswordField();
@@ -37,7 +37,7 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
 
-        this.getContentPane().setBackground(Color.cyan);
+        this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // Logo
         ImageIcon uneImage = new ImageIcon("src/images/logo.png");
@@ -47,9 +47,10 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
 
         // Formulaire
         this.panelForm.setBounds(300, 40, 260, 200);
-        this.panelForm.setBackground(Color.cyan);
+        this.panelForm.setBackground(Color.decode("#4D61F4"));
         this.panelForm.setLayout(new GridLayout(4, 2, 10, 10));
 
+        
         this.panelForm.add(new JLabel("Email :"));
         this.panelForm.add(this.txtEmail);
 
@@ -59,15 +60,15 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
         this.panelForm.add(this.btAnnuler);
         this.panelForm.add(this.btValider);
 
-        this.panelForm.add(new JLabel(""));
-        this.panelForm.add(this.btInscription);
+       // this.panelForm.add(new JLabel(""));
+       // this.panelForm.add(this.btInscription);
 
         this.add(this.panelForm);
 
         // Listeners
         this.btAnnuler.addActionListener(this);
         this.btValider.addActionListener(this);
-        this.btInscription.addActionListener(this);
+        // this.btInscription.addActionListener(this);
 
         this.txtEmail.addKeyListener(this);
         this.txtMdp.addKeyListener(this);
@@ -85,11 +86,11 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
         else if (e.getSource() == this.btValider) {
             this.traitementConnexion();
         }
-        else if (e.getSource() == this.btInscription) {
+        /*else if (e.getSource() == this.btInscription) {
             // Ouvrir la fenêtre d'inscription
             this.dispose();
             new VueInscription();
-        }
+        }*/
     }
 
     public void traitementConnexion() {
@@ -100,7 +101,7 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
             JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs");
         } else {
 
-            User unUser = Controller.selectWhereUser(email, mdp);
+            User unUser = ControllerUtilisateur.selectWhereUser(email, mdp);
 
             if (unUser == null) {
                 JOptionPane.showMessageDialog(this, "Identifiants incorrects");

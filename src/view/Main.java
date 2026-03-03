@@ -1,8 +1,13 @@
 package view;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 public class Main {
     public static void main(String[] args) {
-        // Lancement de la fenêtre de connexion
+        
+    	FlatLightLaf.setup();
+    	
+    	// Lancement de la fenêtre de connexion
         new VueConnexion();
     }
 }

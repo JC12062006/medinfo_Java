@@ -1,27 +1,32 @@
 package controller;
 
-import model.Model;
+import model.ModelUtilisateur;
 
-public class Controller {
+public class ControllerUtilisateur {
 
     /**
      * Méthode de connexion utilisateur
      */
     public static User selectWhereUser(String email, String mdp) {
-        return Model.selectWhereUser(email, mdp);
+        return ModelUtilisateur.selectWhereUser(email, mdp);
     }
 
     /**
      * Méthode d'inscription d'un utilisateur (secrétaire)
-     */
+     
     public static void insertUtilisateur(User unUser) {
-        Model.insertUtilisateur(unUser);
+        ModelUtilisateur.insertUtilisateur(unUser);
     }
-
+    
+	*/
+    
+    
     /**
      * Hashage SHA1 (utilisé pour l'inscription)
-     */
+     
     public static String sha1(String mdp) {
-        return Model.sha1(mdp);
+        return ModelUtilisateur.sha1(mdp);
     }
+    
+    */
 }

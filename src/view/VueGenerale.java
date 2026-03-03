@@ -33,13 +33,13 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
 
-        this.getContentPane().setBackground(Color.cyan);
+        this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // -------------------------
         // MENU HAUT
         // -------------------------
         this.panelMenu.setBounds(200, 10, 500, 40);
-        this.panelMenu.setBackground(Color.cyan);
+        this.panelMenu.setBackground(Color.decode("#4D61F4"));
         this.panelMenu.setLayout(new GridLayout(1, 2, 10, 10));
         this.panelMenu.add(this.btAjouterMedecin);
 
@@ -53,7 +53,7 @@ public class VueGenerale extends JFrame implements ActionListener {
         // PANEL ACCUEIL
         // -------------------------
         this.panelAccueil.setBounds(50, 80, 800, 350);
-        this.panelAccueil.setBackground(Color.cyan);
+        this.panelAccueil.setBackground(Color.decode("#4D61F4"));
         this.panelAccueil.setLayout(null);
 
         this.lbBienvenue.setText(

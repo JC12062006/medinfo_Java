@@ -1,4 +1,4 @@
-package view;
+/*package view;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -127,9 +127,10 @@ public class VueInscription extends JFrame implements ActionListener {
         // Création de l'objet User
         User unUser = new User(nom, prenom, email, telephone, hash, dateNaissance);
 
-        // Insertion dans la BDD
+        /* Insertion dans la BDD
         Controller.insertUtilisateur(unUser);
-
+		
+        
         JOptionPane.showMessageDialog(this, "Compte secrétaire créé avec succès");
 
         // Retour à la connexion
@@ -137,3 +138,4 @@ public class VueInscription extends JFrame implements ActionListener {
         new VueConnexion();
     }
 }
+*/
