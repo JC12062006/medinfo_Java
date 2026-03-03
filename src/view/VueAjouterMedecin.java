@@ -2,12 +2,19 @@ package view;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
+
+import controller.ControllerSpecialite;
+import controller.Specialite;
 
 public class VueAjouterMedecin extends JFrame implements ActionListener {
 
+	private JComboBox<String> cbxSpecialites = new JComboBox<String>();
+	
+	private JTextField txtPrenom = new JTextField();
     private JTextField txtNom = new JTextField();
-    private JTextField txtPrenom = new JTextField();
     private JTextField txtEmail = new JTextField();
     private JTextField txtTelephone = new JTextField();
     private JTextField txtDateNaissance = new JTextField();
@@ -59,18 +66,10 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
         panelForm.add(new JLabel("Expériences :"));
         panelForm.add(txtExperiences);
 
-        panelForm.add(new JLabel("Spécialité :"));
+        panelForm.add(new JLabel("Specialites : "));
+		panelForm.add(this.cbxSpecialites);
 
-        cbSpecialite = new JComboBox<>(new String[]{
-                "Cardiologie",
-                "Dermatologie",
-                "Gynécologie",
-                "Pédiatrie",
-                "Neurologie",
-                "Médecine générale"
-        });
-
-        panelForm.add(cbSpecialite);
+        panelForm.add(cbxSpecialites);
 
         panelForm.add(new JLabel("Description :"));
         panelForm.add(new JScrollPane(txtDescription));
@@ -84,9 +83,21 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 
         btValider.addActionListener(this);
         btAnnuler.addActionListener(this);
+        
+     // Remplir le ComboBox avec les specialites existantes
+     	this.remplirCBX();
 
         this.setVisible(true);
     }
+    
+    public void remplirCBX() {
+		cbxSpecialites.removeAllItems();
+		ArrayList<Specialite> lesSpecialites = ControllerSpecialite.selectAllSpecialite();
+		for (Specialite uneSpecialite : lesSpecialites) {
+			// On ajoute "ID - Nom"
+			cbxSpecialites.addItem(uneSpecialite.getIdSpecialite() + " - " + uneSpecialite.getLibelle());
+		}
+	}
 
     @Override
     public void actionPerformed(ActionEvent e) {
