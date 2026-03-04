@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import controller.User;
+import controller.Medecin;
 
 public class Model {
 
@@ -96,6 +97,72 @@ public class Model {
 
         } catch (SQLException exp) {
             System.out.println("Erreur d'exécution : " + requete);
+        }
+    }
+
+    /**
+     * Inscription d'un utilisateur médecin
+     */
+    public static int insertUtilisateurMedecin(User u) {
+        int idUtilisateur = 0;
+
+        String requete = "INSERT INTO utilisateur " +
+                "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
+                "'" + u.getNom() + "', " +
+                "'" + u.getPrenom() + "', " +
+                "'" + u.getEmail() + "', " +
+                "'" + u.getHashPassword() + "', " +
+                "'" + u.getTelephone() + "', " +
+                "'Medecin', " +
+                "'" + u.getDateNaissance() + "');";
+
+        try {
+            uneBdd.seConnecter();
+            Statement unStat = uneBdd.getMaConnexion().createStatement();
+
+            unStat.execute(requete);
+
+            // Récupération de l'ID généré
+            ResultSet rs = unStat.executeQuery("SELECT LAST_INSERT_ID();");
+            if (rs.next()) {
+                idUtilisateur = rs.getInt(1);
+            }
+
+            unStat.close();
+            uneBdd.seDeconnecter();
+
+        } catch (SQLException exp) {
+            System.out.println("Erreur insertUtilisateurMedecin : " + requete);
+        }
+
+        return idUtilisateur;
+    }
+
+    /**
+     * Insertion d'un médecin
+     */
+    public static void insertMedecin(Medecin m) {
+
+        String requete = "INSERT INTO medecin " +
+                "(rpps, est_conventionne, formations, langues_parlees, experiences, description, fk_id_utilisateur, fk_id_specialite) VALUES (" +
+                "'" + m.getRpps() + "', " +
+                "'" + m.getEstConventionne() + "', " +
+                "'" + m.getFormations() + "', " +
+                "'" + m.getLanguesParlees() + "', " +
+                "'" + m.getExperiences() + "', " +
+                "'" + m.getDescription() + "', " +
+                "'" + m.getFkIdUtilisateur() + "', " +
+                "'" + m.getFkIdSpecialite() + "');";
+
+        try {
+            uneBdd.seConnecter();
+            Statement unStat = uneBdd.getMaConnexion().createStatement();
+            unStat.execute(requete);
+            unStat.close();
+            uneBdd.seDeconnecter();
+
+        } catch (SQLException exp) {
+            System.out.println("Erreur insertMedecin : " + requete);
         }
     }
 }
