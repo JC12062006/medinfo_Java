@@ -24,8 +24,6 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
     private JTextField txtExperiences = new JTextField();
     private JTextArea txtDescription = new JTextArea();
 
-    private JComboBox<String> cbSpecialite;
-
     private JButton btValider = new JButton("Valider");
     private JButton btAnnuler = new JButton("Annuler");
 
