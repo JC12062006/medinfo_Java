@@ -10,7 +10,21 @@ import controller.Rdv;
 
 public class ModelRdv {
 	
-private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+
+	public static void executerRequete(String requete) {
+	
+		try {
+			uneBdd.seConnecter();
+			Statement unStat = uneBdd.getMaConnexion().createStatement();
+			unStat.execute(requete);
+			unStat.close();
+			uneBdd.seDeconnecter();
+		}
+		catch (SQLException exp) {
+			System.out.println("Erreur d'execution de la requete:" + requete);
+			}
+	}
     
 	public static ArrayList<Rdv> selectAllRdv(String filtre) {
 	    	
@@ -49,4 +63,29 @@ private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
 	
 	        return lesPatients;
 	    }
+	
+	public static void updateRdv(Rdv unRdv) {
+	    // On construit la chaîne de caractères avec les valeurs de l'objet unRdv
+	    String requete = "UPDATE rendez_vous SET " 
+	            + "motif = '" + unRdv.getMotif() + "', "
+	            + "statut = '" + unRdv.getStatut() + "', "
+	            + "origine = '" + unRdv.getOrigine() + "', "
+	            + "fk_id_patient = " + unRdv.getFkIdPatient() + ", "
+	            + "fk_id_creneau = " + unRdv.getFkIdCreneau() + " "
+	            + "WHERE id_rdv = " + unRdv.getIdRdv() + ";";
+	            
+	    // On exécute la requête avec ta méthode existante
+	    executerRequete(requete);
+	}
+	
+	public static void deleteRdv(int idRdv) {
+		String requete = "delete from rendez_vous where id_rdv =" + idRdv +";";
+		executerRequete (requete);
+	}
+	
+	
 }
+
+
+
+

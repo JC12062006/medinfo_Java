@@ -14,13 +14,13 @@ public class Rdv {
     
     public Rdv(int idRdv, int fkIdPatient, int fkIdCreneau, LocalDateTime datecreation, String motif, String statut, String origine){
     	
-    	this.dateCreation = datecreation;
+    	this.dateCreation = datecreation.now();
     	this.idRdv = idRdv;
     	this.fkIdPatient = fkIdPatient;
     	this.fkIdCreneau = fkIdCreneau;
     	this.motif = motif;
     	this.statut = statut;
-    	this.origine = origine;
+    	this.origine = "Desktop";
     }
 
 	public int getIdRdv() {

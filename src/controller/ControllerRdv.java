@@ -7,21 +7,23 @@ import model.ModelRdv;
 
 public class ControllerRdv {
 
-public static ArrayList<Rdv> selectAllRdv(String filtre){
+	public static ArrayList<Rdv> selectAllRdv(String filtre){
+			
+			return ModelRdv.selectAllRdv(filtre);
+		}
+	
+	public static void insertRdv(Rdv unRdv) {
 		
-		return ModelRdv.selectAllRdv(filtre);
+		
 	}
-
-public static void insertRdv(Object Rdv) {
 	
-}
-
-public static void deleteRdv(int idRdv) {
+	public static void deleteRdv(int idRdv) {
+		ModelRdv.deleteRdv(idRdv);
+	}
 	
-}
-
-public static void updateRdv(Object Rdv) {
-	
-}
+	public static void updateRdv(Rdv unRdv) {
+		
+		ModelRdv.updateRdv(unRdv);
+	}
 	
 }

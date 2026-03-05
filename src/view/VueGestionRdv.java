@@ -26,11 +26,12 @@ import controller.ControllerPatient;
 import controller.Patient;
 import controller.Rdv;
 import controller.Tableau;
+import controller.User;
 
 public class VueGestionRdv extends JFrame implements ActionListener, KeyListener {
 	
-	
-	
+	private User unUser;
+		
 	private JPanel panelForm = new JPanel();
 
 	private JTextField txtMotif = new JTextField();
@@ -43,9 +44,9 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	private JComboBox<String> cbxStatut;
 	
 	private JButton btAnnuler = new JButton("Annuler");
-	private JButton btValider = new JButton("Valider");
 	private JButton btModifier = new JButton("Modifier");
 	private JButton btSupprimer = new JButton("Supprimer");
+	private JButton btRetour = new JButton("Retour à l'accueil");
 	
 	private JTable tableRdv;
 	private JScrollPane scrollRdv;
@@ -53,15 +54,21 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	
 	private JLabel lbNbRdv = new JLabel();
 	
-	public VueGestionRdv() {
+	private ArrayList<Patient> tousLesPatients;
+	
+	public VueGestionRdv(User unUser) {
+		
+		this.unUser = unUser;
 		
 		this.setTitle("Gestion des Rendez-vous");
 	    this.setBounds(200, 100, 1000, 500); // Taille et position de la fenêtre
 	    this.setLayout(null);
 	    this.getContentPane().setBackground(Color.decode("#4D61F4"));
+	    
+	    this.btRetour.setBounds(50, 20, 150, 30);
 		
-		// Remplir la Combobox avec les statuts 
-		String[] lesStatuts = {"À Confirmer", "Confirmé", "Annulé", "Honoré"};
+		// Remplir la Combobox avec les status 
+		String[] lesStatuts = {"Sélectionner un statut", "À Confirmer", "Confirmé", "Annulé", "Honoré"};
 		cbxStatut = new JComboBox<>(lesStatuts);
 		
 		// --- Panel Formulaire ---
@@ -79,13 +86,16 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		this.panelForm.add(this.txtMotif);
 		
 		this.panelForm.add(this.btAnnuler);
-		this.panelForm.add(this.btValider);
 		this.panelForm.add(this.btModifier);
 		this.panelForm.add(this.btSupprimer);
 		
 		this.btModifier.setEnabled(false);
 		this.btSupprimer.setEnabled(false);
+		
+		this.add(btRetour);
 		this.add(this.panelForm);
+		
+		this.tousLesPatients = ControllerPatient.selectAllPatientsFiltre("");
 		
 		// --- Saisie Prédictive Patient ---
 		cbxPatients.setEditable(true);
@@ -94,14 +104,25 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		editor.addKeyListener(new KeyAdapter() {
 		    @Override
 		    public void keyReleased(KeyEvent e) {
+		    	
+		        // On ignore les flèches de direction et la touche Entrée
 		        if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN 
 		            || e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_LEFT 
 		            || e.getKeyCode() == KeyEvent.VK_RIGHT) {
 		            return;
 		        }
+		        
+		        // On sauvegarde le texte et la position du curseur
 		        String texteSaisi = editor.getText();
+		        int positionCurseur = editor.getCaretPosition(); 
+		        
+		        // On met à jour la liste
 		        rafraichirCbxPatients(texteSaisi);
+		        
+		        // On restaure le texte et la position du curseur pour ne pas gêner la frappe
 		        editor.setText(texteSaisi);
+		        editor.setCaretPosition(positionCurseur);
+		        
 		        if (cbxPatients.getItemCount() > 0) {
 		            cbxPatients.showPopup();
 		        }
@@ -110,13 +131,14 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		
 		// Remplissage initial de la combobox
 		rafraichirCbxPatients("");
+		// On force le texte affiché par défaut (astuce possible car la combobox est Editable)
+		cbxPatients.setSelectedItem("Sélectionner un patient");
 				
 		// --- Listeners ---
 		this.btAnnuler.addActionListener(this);
-		this.btValider.addActionListener(this);
 		this.btModifier.addActionListener(this);
 		this.btSupprimer.addActionListener(this);
-		this.btFiltrer.addActionListener(this); // Ajout du listener manquant
+		this.btRetour.addActionListener(this); 
 		this.txtMotif.addKeyListener(this);
 		
 		// --- JTable ---
@@ -144,9 +166,24 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 				// Remplissage du motif (Colonne 1)
 				txtMotif.setText(unTableau.getValueAt(numLigne, 1).toString());
 
-				// Remplissage du statut (Colonne 3) - Correction : setSelectedItem
-				String statut = unTableau.getValueAt(numLigne, 3).toString();
-				cbxStatut.setSelectedItem(statut);
+				// Remplissage du statut (Colonne 3)
+				String statutBdd = unTableau.getValueAt(numLigne, 3).toString();
+
+				// On parcourt tous les éléments de la combobox Statut
+				for (int i = 0; i < cbxStatut.getItemCount(); i++) {
+				    String itemCbx = cbxStatut.getItemAt(i);
+				    
+				    // Cas spécial : si la BDD dit "a_confirmer", on veut sélectionner "À Confirmer"
+				    if (statutBdd.equalsIgnoreCase("a_confirmer") && itemCbx.equals("À Confirmer")) {
+				        cbxStatut.setSelectedIndex(i);
+				        break; // On a trouvé, on arrête de chercher
+				    } 
+				    // Pour les autres ("confirmé", "annulé", "honoré"), on compare en ignorant les majuscules/minuscules
+				    else if (itemCbx.equalsIgnoreCase(statutBdd)) {
+				        cbxStatut.setSelectedIndex(i);
+				        break; // On a trouvé, on arrête de chercher
+				    }
+				}
 				
 				// Remplissage du combobox Patient (Colonne 4)
 				String idPatientTable = unTableau.getValueAt(numLigne, 4).toString();
@@ -173,13 +210,20 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	
 	// --- Méthode ajoutée pour gérer la saisie prédictive ---
 	public void rafraichirCbxPatients(String filtre) {
-		cbxPatients.removeAllItems();
-		// On suppose que cette méthode existe dans ton ControllerPatient
-		ArrayList<Patient> lesPatients = ControllerPatient.selectAllPatientsFiltre(filtre);
-		for (Patient unP : lesPatients) {
-			// TRÈS IMPORTANT : On ajoute l'ID au début pour pouvoir le récupérer plus tard
-			cbxPatients.addItem(unP.getIdPatient() + " - " + unP.getNom() + " " + unP.getPrenom());
-		}
+	    cbxPatients.removeAllItems();
+	    
+	    // On met le filtre en minuscules pour que la recherche ne soit pas sensible à la casse
+	    String filtreLower = filtre.toLowerCase();
+	    
+	    // On filtre la liste chargée en mémoire (plus besoin d'interroger la BDD à chaque touche !)
+	    for (Patient unP : this.tousLesPatients) {
+	        String affichage = unP.getIdPatient() + " - " + unP.getNom() + " " + unP.getPrenom();
+	        
+	        // Si le filtre est vide, ou si le nom/prénom contient le texte tapé
+	        if (filtre.isEmpty() || affichage.toLowerCase().contains(filtreLower)) {
+	            cbxPatients.addItem(affichage);
+	        }
+	    }
 	}
 	
 	public Object [][] obtenirDonnees(String filtre){
@@ -203,9 +247,6 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		if (e.getSource() == this.btAnnuler){
 			this.viderChamps();
 		}
-		else if (e.getSource() == this.btValider) {
-			this.traitement();
-		}
 		else if (e.getSource() == this.btFiltrer) {
 			String filtre = this.txtFiltre.getText();
 			this.unTableau.setDonnees(this.obtenirDonnees(filtre));
@@ -216,32 +257,46 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		else if(e.getSource() == this.btSupprimer) {
 			this.deleteRdv();
 		}
+		else if(e.getSource() == this.btRetour) {
+			this.dispose();
+			new VueGenerale(this.unUser);
+		}
 	}
 	
 	public void updateRdv() {
-		int numLigne = tableRdv.getSelectedRow();
-		int idRdv = Integer.parseInt(unTableau.getValueAt(numLigne, 0).toString());
-		
-		String motif = this.txtMotif.getText();
-		String statut = this.cbxStatut.getSelectedItem().toString();
-		
-		// Récupération de l'id patient depuis le combobox
-		String chainePatient = this.cbxPatients.getSelectedItem().toString();
-		String tab[] = chainePatient.split(" - ");
-		int idPatient = Integer.parseInt(tab[0]);
-		
-		if (motif.equals("")){
-			JOptionPane.showMessageDialog(this, "Veuillez remplir le motif.");
-		} else {
-			// On suppose que tu récupères l'origine et l'idCreneau ailleurs (ou tu mets des valeurs par défaut)
-			Rdv unRdv = new Rdv(idRdv, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet");
-			
-			ControllerRdv.updateRdv(unRdv);
-			JOptionPane.showMessageDialog(this, "Le RDV a été modifié avec succès !");
-			
-			this.unTableau.setDonnees(this.obtenirDonnees(""));
-			this.viderChamps();
-		}
+	    int numLigne = tableRdv.getSelectedRow();
+	    int idRdv = Integer.parseInt(unTableau.getValueAt(numLigne, 0).toString());
+	    
+	    String motif = this.txtMotif.getText();
+	    String statut = this.cbxStatut.getSelectedItem().toString();
+	    String chainePatient = this.cbxPatients.getSelectedItem().toString();
+	    
+	    // --- VÉRIFICATIONS DE SÉCURITÉ ---
+	    if (motif.equals("")){
+	        JOptionPane.showMessageDialog(this, "Veuillez remplir le motif.");
+	        return; // On arrête la méthode ici
+	    } 
+	    if (statut.equals("-- Sélectionner un statut --")) {
+	        JOptionPane.showMessageDialog(this, "Veuillez choisir un statut valide.");
+	        return;
+	    }
+	    if (chainePatient.equals("-- Sélectionner un patient --") || !chainePatient.contains(" - ")) {
+	        JOptionPane.showMessageDialog(this, "Veuillez sélectionner un patient dans la liste.");
+	        return;
+	    }
+	    
+	    // Si tout est bon, on continue...
+	    String tab[] = chainePatient.split(" - ");
+	    int idPatient = Integer.parseInt(tab[0]);
+	    
+	    // On suppose que tu récupères l'origine et l'idCreneau ailleurs
+	    Rdv unRdv = new Rdv(idRdv, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet");
+	    
+	    ControllerRdv.updateRdv(unRdv);
+	    JOptionPane.showMessageDialog(this, "Le RDV a été modifié avec succès !");
+	    
+	    this.unTableau.setDonnees(this.obtenirDonnees(""));
+	    this.viderChamps();
 	}
 	
 	public void deleteRdv() {
@@ -260,40 +315,20 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	}
 	
 	public void viderChamps() {
-		this.txtMotif.setText("");
-		if(this.cbxStatut.getItemCount() > 0) {
-			this.cbxStatut.setSelectedIndex(0); // Remet sur "À confirmer"
-		}
-		if(this.cbxPatients.getItemCount() > 0) {
-			this.cbxPatients.setSelectedIndex(0);
-		}
-		this.btModifier.setEnabled(false);
-		this.btSupprimer.setEnabled(false);
-	}
-	
-	public void traitement() {
-		String motif = this.txtMotif.getText();
-		String statut = this.cbxStatut.getSelectedItem().toString();
-		
-		// Récupération de l'id patient depuis le combobox
-		String chainePatient = this.cbxPatients.getSelectedItem().toString();
-		String tab[] = chainePatient.split(" - ");
-		int idPatient = Integer.parseInt(tab[0]);
-		
-		if (motif.equals("")){
-			JOptionPane.showMessageDialog(this, "Veuillez remplir le motif.");
-		} else {
-			// Création d'un nouveau RDV sans ID
-			Rdv unRdv = new Rdv(0, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet");
-			
-			ControllerRdv.insertRdv(unRdv);
-			
-			JOptionPane.showMessageDialog(this, "RDV inséré avec succès.");
-			
-			this.viderChamps();
-			this.unTableau.setDonnees(this.obtenirDonnees(""));
-			this.lbNbRdv.setText("Nombre de rendez-vous : " + unTableau.getRowCount());
-		}
+	    this.txtMotif.setText("");
+	    
+	    if(this.cbxStatut.getItemCount() > 0) {
+	        // L'index 0 correspond maintenant à "-- Sélectionner un statut --"
+	        this.cbxStatut.setSelectedIndex(0); 
+	    }
+	    
+	    if(this.cbxPatients.getItemCount() > 0) {
+	        // On remet le texte personnalisé pour les patients
+	        this.cbxPatients.setSelectedItem("-- Sélectionner un patient --");
+	    }
+	    
+	    this.btModifier.setEnabled(false);
+	    this.btSupprimer.setEnabled(false);
 	}
 
 	@Override public void keyTyped(KeyEvent e) {}
@@ -305,7 +340,7 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 				String filtre = this.txtFiltre.getText();
 				this.unTableau.setDonnees(this.obtenirDonnees(filtre));
 			} else {
-				traitement();
+				updateRdv();
 			}
 		}
 	}

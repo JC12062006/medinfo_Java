@@ -17,7 +17,7 @@ public class ModelPatient extends ModelUtilisateur {
 	    	
 	    	String requete;
 	    		
-	    	if(filtre == ""){
+	    	if(filtre == null || filtre.isEmpty()){
 	    		requete = "SELECT p.*, u.* "
 	                    + "FROM patient p "
 	                    + "INNER JOIN utilisateur u ON p.fk_id_utilisateur = u.id_utilisateur "
@@ -47,7 +47,7 @@ public class ModelPatient extends ModelUtilisateur {
 	        } catch (SQLException exp) {
 	            //System.out.println("Erreur d'exécution : " + requete);
 	            
-	            System.out.println("Raison exacte : " + exp.getMessage());
+	            System.out.println("Erreur : " + exp.getMessage());
 	        }
 	
 	        return lesPatients;

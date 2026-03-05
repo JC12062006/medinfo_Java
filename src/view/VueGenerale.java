@@ -84,7 +84,7 @@ public class VueGenerale extends JFrame implements ActionListener {
         
         if (e.getSource() == this.btGestionRdv) {
             this.dispose();
-            new VueGestionRdv();
+            new VueGestionRdv(this.unUser);
         }
     }
 }
