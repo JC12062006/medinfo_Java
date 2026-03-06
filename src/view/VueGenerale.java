@@ -25,6 +25,8 @@ public class VueGenerale extends JFrame implements ActionListener {
     private JButton btAjouterMedecin = new JButton("Ajouter un médecin");
     private JButton btAjouterPatient = new JButton("Ajouter un patient");
     private JButton btGestionRdv = new JButton("Gestion Rdv");
+    private JButton btGestionCreneau = new JButton("Gestion Créneaux");
+
 
 
     public VueGenerale(User unUser) {
@@ -47,6 +49,7 @@ public class VueGenerale extends JFrame implements ActionListener {
   
         this.panelMenu.add(this.btAjouterMedecin);
         this.panelMenu.add(this.btGestionRdv);
+        this.panelMenu.add(this.btGestionCreneau);
         this.panelMenu.add(this.btAjouterPatient);
         this.panelMenu.add(this.btDeconnexion);
 
@@ -56,6 +59,8 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.btAjouterMedecin.addActionListener(this);
         this.btAjouterPatient.addActionListener(this);
         this.btGestionRdv.addActionListener(this);
+        this.btGestionCreneau.addActionListener(this);
+
 
         // -------------------------
         // PANEL ACCUEIL
@@ -95,5 +100,10 @@ public class VueGenerale extends JFrame implements ActionListener {
             this.dispose();
             new VueGestionRdv(this.unUser);
         }
+        if (e.getSource() == this.btGestionCreneau) {
+            this.dispose();
+            new VueGestionCreneau(this.unUser);
+        }
+
     }
 }
