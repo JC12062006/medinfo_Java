@@ -72,6 +72,4 @@ public class Patient extends User{
 	public void setSexe(String sexe) {
 		this.sexe = sexe;
 	}
-
-	
 }

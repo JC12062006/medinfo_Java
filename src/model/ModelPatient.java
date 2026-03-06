@@ -1,17 +1,17 @@
 package model;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Statement;
 import java.util.ArrayList;
 
 import controller.Patient;
 
 public class ModelPatient extends ModelUtilisateur {
-	
+
     private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
-    
-	public static ArrayList<Patient> selectAllPatientsFiltre(String filtre) {
+
+   public static ArrayList<Patient> selectAllPatientsFiltre(String filtre) {
 	    	
 	    	ArrayList<Patient> lesPatients = new ArrayList<Patient>();
 	    	
@@ -52,4 +52,29 @@ public class ModelPatient extends ModelUtilisateur {
 	
 	        return lesPatients;
 	    }
+  
+    public static void insertPatient(Patient p) {
+
+        String requete = "INSERT INTO patient " +
+                "(adresse, num_secu, sexe, fk_id_utilisateur) VALUES (" +
+                "'" + p.getAdresse() + "', " +
+                "'" + p.getNumSecu() + "', " +
+                "'" + p.getSexe() + "', " +
+                p.getFkIdUtilisateur() + ");";
+
+        try {
+            uneBdd.seConnecter();
+            Statement unStat = uneBdd.getMaConnexion().createStatement();
+
+            int lignes = unStat.executeUpdate(requete);
+            System.out.println(">>> Lignes insérées dans patient : " + lignes);
+
+            unStat.close();
+            uneBdd.seDeconnecter();
+
+        } catch (SQLException exp) {
+            System.out.println("Erreur SQL : " + exp.getMessage());
+            System.out.println("Requête : " + requete);
+        }
+    }
 }

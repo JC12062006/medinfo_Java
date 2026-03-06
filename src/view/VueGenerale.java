@@ -21,7 +21,9 @@ public class VueGenerale extends JFrame implements ActionListener {
 
     private JPanel panelAccueil = new JPanel();
     private JLabel lbBienvenue = new JLabel();
+
     private JButton btAjouterMedecin = new JButton("Ajouter un médecin");
+    private JButton btAjouterPatient = new JButton("Ajouter un patient");
     private JButton btGestionRdv = new JButton("Gestion Rdv");
 
 
@@ -34,7 +36,6 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.setLayout(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
-
         this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // -------------------------
@@ -43,13 +44,16 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.panelMenu.setBounds(200, 10, 500, 40);
         this.panelMenu.setBackground(Color.decode("#4D61F4"));
         this.panelMenu.setLayout(new GridLayout(1, 2, 10, 10));
+  
         this.panelMenu.add(this.btAjouterMedecin);
         this.panelMenu.add(this.btGestionRdv);
         this.panelMenu.add(this.btDeconnexion);
+
         this.add(this.panelMenu);
 
         this.btDeconnexion.addActionListener(this);
         this.btAjouterMedecin.addActionListener(this);
+        this.btAjouterPatient.addActionListener(this);
         this.btGestionRdv.addActionListener(this);
 
         // -------------------------
@@ -75,6 +79,10 @@ public class VueGenerale extends JFrame implements ActionListener {
 
         if (e.getSource() == this.btAjouterMedecin) {
             new VueAjouterMedecin();
+        }
+
+        if (e.getSource() == this.btAjouterPatient) {
+            new VueAjouterPatient();
         }
 
         if (e.getSource() == this.btDeconnexion) {
