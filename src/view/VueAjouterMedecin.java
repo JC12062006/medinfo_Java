@@ -6,14 +6,12 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import controller.ControllerSpecialite;
-import controller.Specialite;
+import controller.*;
+import model.ModelUtilisateur;
 
 public class VueAjouterMedecin extends JFrame implements ActionListener {
 
-	private JComboBox<String> cbxSpecialites = new JComboBox<String>();
-	
-	private JTextField txtPrenom = new JTextField();
+    private JTextField txtPrenom = new JTextField();
     private JTextField txtNom = new JTextField();
     private JTextField txtEmail = new JTextField();
     private JTextField txtTelephone = new JTextField();
@@ -24,7 +22,8 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
     private JTextField txtExperiences = new JTextField();
     private JTextArea txtDescription = new JTextArea();
 
-    private JComboBox<String> cbSpecialite;
+    private JComboBox<String> cbxSpecialites = new JComboBox<>();
+    private JCheckBox cbConventionne = new JCheckBox("Conventionné ?");
 
     private JButton btValider = new JButton("Valider");
     private JButton btAnnuler = new JButton("Annuler");
@@ -32,12 +31,13 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
     public VueAjouterMedecin() {
 
         this.setTitle("Ajouter un médecin");
-        this.setBounds(400, 150, 600, 600);
+        this.setBounds(400, 150, 600, 650);
         this.setLayout(new BorderLayout());
         this.setResizable(false);
 
         JPanel panelForm = new JPanel();
-        panelForm.setLayout(new GridLayout(12, 2, 5, 5));
+        panelForm.setLayout(new GridLayout(13, 2, 5, 5));
+        panelForm.setBackground(Color.decode("#4D61F4"));
 
         panelForm.add(new JLabel("Nom :"));
         panelForm.add(txtNom);
@@ -66,15 +66,17 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
         panelForm.add(new JLabel("Expériences :"));
         panelForm.add(txtExperiences);
 
-        panelForm.add(new JLabel("Specialites : "));
-		panelForm.add(this.cbxSpecialites);
+        panelForm.add(new JLabel("Conventionné :"));
+        panelForm.add(cbConventionne);
 
+        panelForm.add(new JLabel("Spécialité :"));
         panelForm.add(cbxSpecialites);
 
         panelForm.add(new JLabel("Description :"));
         panelForm.add(new JScrollPane(txtDescription));
 
         JPanel panelBoutons = new JPanel();
+        panelBoutons.setBackground(Color.decode("#4D61F4"));
         panelBoutons.add(btValider);
         panelBoutons.add(btAnnuler);
 
@@ -83,21 +85,19 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 
         btValider.addActionListener(this);
         btAnnuler.addActionListener(this);
-        
-     // Remplir le ComboBox avec les specialites existantes
-     	this.remplirCBX();
+
+        remplirCBX();
 
         this.setVisible(true);
     }
-    
+
     public void remplirCBX() {
-		cbxSpecialites.removeAllItems();
-		ArrayList<Specialite> lesSpecialites = ControllerSpecialite.selectAllSpecialite();
-		for (Specialite uneSpecialite : lesSpecialites) {
-			// On ajoute "ID - Nom"
-			cbxSpecialites.addItem(uneSpecialite.getIdSpecialite() + " - " + uneSpecialite.getLibelle());
-		}
-	}
+        cbxSpecialites.removeAllItems();
+        ArrayList<Specialite> lesSpecialites = ControllerSpecialite.selectAllSpecialite();
+        for (Specialite uneSpecialite : lesSpecialites) {
+            cbxSpecialites.addItem(uneSpecialite.getIdSpecialite() + " - " + uneSpecialite.getLibelle());
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -108,8 +108,36 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 
         if (e.getSource() == btValider) {
 
+            User u = new User(
+                    txtNom.getText(),
+                    txtPrenom.getText(),
+                    txtEmail.getText(),
+                    txtTelephone.getText(),
+                    ModelUtilisateur.sha1("123"),
+                    txtDateNaissance.getText()
+            );
+
+            int idUser = ControllerUtilisateur.insertUtilisateur(u);
+
+            String item = cbxSpecialites.getSelectedItem().toString();
+            int idSpecialite = Integer.parseInt(item.split(" - ")[0]);
+
+            Medecin m = new Medecin(
+                    txtRpps.getText(),
+                    cbConventionne.isSelected() ? 1 : 0,
+                    txtFormations.getText(),
+                    txtLangues.getText(),
+                    txtExperiences.getText(),
+                    txtDescription.getText(),
+                    idUser,
+                    idSpecialite
+            );
+
+            System.out.println(">>> Insertion médecin exécutée");
+            ControllerMedecin.insertMedecin(m);
+
             JOptionPane.showMessageDialog(this,
-                    "Médecin ajouté (à relier avec le contrôleur)",
+                    "Médecin ajouté avec succès",
                     "Information",
                     JOptionPane.INFORMATION_MESSAGE);
 

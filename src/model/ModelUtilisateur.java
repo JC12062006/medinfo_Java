@@ -10,12 +10,8 @@ import controller.User;
 
 public class ModelUtilisateur {
 
-    // Connexion à la base MedInfo
     private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
 
-    /**
-     * Méthode utilitaire : hashage SHA1 du mot de passe
-     */
     public static String sha1(String input) {
         try {
             MessageDigest mDigest = MessageDigest.getInstance("SHA1");
@@ -33,9 +29,6 @@ public class ModelUtilisateur {
         }
     }
 
-    /**
-     * Connexion utilisateur (email + mot de passe)
-     */
     public static User selectWhereUser(String email, String mdp) {
         User unUser = null;
 
@@ -73,30 +66,38 @@ public class ModelUtilisateur {
     }
 
     /**
-     -------------Inscription d'un utilisateur (secrétaire)----------------
-     
-    public static void insertUtilisateur(User u) {
+     * Insertion d'un utilisateur + récupération de son ID
+     */
+    public static int insertUtilisateur(User u) {
+        int id = 0;
 
-        String requete = "INSERT INTO utilisateur" +
-                "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES(" +
+        String requete = "INSERT INTO utilisateur " +
+                "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
                 "'" + u.getNom() + "', " +
                 "'" + u.getPrenom() + "', " +
                 "'" + u.getEmail() + "', " +
                 "'" + u.getHashPassword() + "', " +
                 "'" + u.getTelephone() + "', " +
-                "'Secretaire', " +
+                "'Medecin', " +
                 "'" + u.getDateNaissance() + "');";
 
         try {
             uneBdd.seConnecter();
             Statement unStat = uneBdd.getMaConnexion().createStatement();
-            unStat.execute(requete);
+            unStat.executeUpdate(requete, Statement.RETURN_GENERATED_KEYS);
+
+            ResultSet rs = unStat.getGeneratedKeys();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+
             unStat.close();
             uneBdd.seDeconnecter();
 
         } catch (SQLException exp) {
             System.out.println("Erreur d'exécution : " + requete);
         }
+
+        return id;
     }
-    */
 }
