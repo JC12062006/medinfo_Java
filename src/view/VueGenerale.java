@@ -47,6 +47,7 @@ public class VueGenerale extends JFrame implements ActionListener {
   
         this.panelMenu.add(this.btAjouterMedecin);
         this.panelMenu.add(this.btGestionRdv);
+        this.panelMenu.add(this.btAjouterPatient);
         this.panelMenu.add(this.btDeconnexion);
 
         this.add(this.panelMenu);

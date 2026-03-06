@@ -81,24 +81,19 @@ public class VueAjouterPatient extends JFrame implements ActionListener {
 
         if (e.getSource() == btValider) {
 
-            // 1) Création de l'utilisateur
-            User u = new User(
+            // 2) Création du patient
+            Patient p = new Patient(
+                    0, // L'ID sera généré par la base de données
                     txtNom.getText(),
                     txtPrenom.getText(),
                     txtEmail.getText(),
                     txtTelephone.getText(),
-                    ModelUtilisateur.sha1("123"),
-                    txtDateNaissance.getText()
-            );
-
-            int idUser = ControllerUtilisateur.insertUtilisateur(u);
-
-            // 2) Création du patient
-            Patient p = new Patient(
+                    ModelUtilisateur.sha1("123"), // hashPassword
+                    txtDateNaissance.getText(),
+                    "patient", // Le rôle par défaut de cet utilisateur
                     txtAdresse.getText(),
                     txtNumSecu.getText(),
-                    cbSexe.getSelectedItem().toString(),
-                    idUser
+                    cbSexe.getSelectedItem().toString()
             );
 
             ControllerPatient.insertPatient(p);

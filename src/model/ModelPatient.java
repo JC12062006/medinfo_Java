@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Statement;
@@ -53,28 +54,55 @@ public class ModelPatient extends ModelUtilisateur {
 	        return lesPatients;
 	    }
   
-    public static void insertPatient(Patient p) {
+   public static void insertPatient(Patient p) {
+	    // 1ère requête : Insérer les données générales dans Utilisateur
+	    String requeteUtilisateur = "INSERT INTO utilisateur " +
+	            "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
+	            "'" + p.getNom() + "', " +
+	            "'" + p.getPrenom() + "', " +
+	            "'" + p.getEmail() + "', " +
+	            "'" + p.getHashPassword() + "', " + 
+	            "'" + p.getTelephone() + "', " +
+	            "'" + p.getRole() + "', " +
+	    		"'" + p.getDateNaissance() + "');";
 
-        String requete = "INSERT INTO patient " +
-                "(adresse, num_secu, sexe, fk_id_utilisateur) VALUES (" +
-                "'" + p.getAdresse() + "', " +
-                "'" + p.getNumSecu() + "', " +
-                "'" + p.getSexe() + "', " +
-                p.getFkIdUtilisateur() + ");";
+	    try {
+	        uneBdd.seConnecter();
+	        // Préparer le statement en lui demandant de nous renvoyer les clés générées (l'Auto-Increment)
+	        Statement unStat = uneBdd.getMaConnexion().createStatement();
+	        
+	        // Exécution de l'insertion de l'utilisateur
+	        unStat.executeUpdate(requeteUtilisateur, Statement.RETURN_GENERATED_KEYS);
+	        
+	        // Récupération de l'ID généré par MySQL
+	        ResultSet rs = unStat.getGeneratedKeys();
+	        int nouvelIdUtilisateur = 0;
+	        
+	        if (rs.next()) {
+	            nouvelIdUtilisateur = rs.getInt(1); // On récupère l'ID
+	            p.setFkIdUtilisateur(nouvelIdUtilisateur); // On met à jour notre objet
+	        }
+	        
+	        // Si l'utilisateur a bien été inséré et qu'on a son ID
+	        if(nouvelIdUtilisateur > 0) {
+	            // 2ème requête : Insérer les données spécifiques dans Patient avec la clé étrangère
+	            String requetePatient = "INSERT INTO patient " +
+	                    "(adresse, num_secu, sexe, fk_id_utilisateur) VALUES (" +
+	                    "'" + p.getAdresse() + "', " +
+	                    "'" + p.getNumSecu() + "', " +
+	                    "'" + p.getSexe() + "', " +
+	                    nouvelIdUtilisateur + ");";
+	            
+	            int lignes = unStat.executeUpdate(requetePatient);
+	            System.out.println(">>> Utilisateur et Patient insérés avec succès !");
+	        }
 
-        try {
-            uneBdd.seConnecter();
-            Statement unStat = uneBdd.getMaConnexion().createStatement();
+	        unStat.close();
+	        uneBdd.seDeconnecter();
 
-            int lignes = unStat.executeUpdate(requete);
-            System.out.println(">>> Lignes insérées dans patient : " + lignes);
-
-            unStat.close();
-            uneBdd.seDeconnecter();
-
-        } catch (SQLException exp) {
-            System.out.println("Erreur SQL : " + exp.getMessage());
-            System.out.println("Requête : " + requete);
-        }
-    }
+	    } catch (SQLException exp) {
+	        System.out.println("Erreur SQL : " + exp.getMessage());
+	        System.out.println("Requête : " + requeteUtilisateur);
+	    }
+	}
 }
