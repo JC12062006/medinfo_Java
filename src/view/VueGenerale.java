@@ -113,10 +113,12 @@ public class VueGenerale extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == this.btListeMedecins) {
+        	this.dispose();
             new VueListeMedecins(this.unUser);
         }
 
         if (e.getSource() == this.btListePatients) {
+        	this.dispose();
             new VueListePatients(this.unUser);
         }
     }
