@@ -19,15 +19,17 @@ public class VueGenerale extends JFrame implements ActionListener {
     private JPanel panelMenu = new JPanel();
     private JButton btDeconnexion = new JButton("Déconnexion");
 
-    private JPanel panelAccueil = new JPanel();
-    private JLabel lbBienvenue = new JLabel();
-
     private JButton btAjouterMedecin = new JButton("Ajouter un médecin");
     private JButton btAjouterPatient = new JButton("Ajouter un patient");
     private JButton btGestionRdv = new JButton("Gestion Rdv");
     private JButton btGestionCreneau = new JButton("Gestion Créneaux");
 
+    // Nouveaux boutons
+    private JButton btListeMedecins = new JButton("Liste Médecins");
+    private JButton btListePatients = new JButton("Liste Patients");
 
+    private JPanel panelAccueil = new JPanel();
+    private JLabel lbBienvenue = new JLabel();
 
     public VueGenerale(User unUser) {
 
@@ -41,26 +43,30 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // -------------------------
-        // MENU HAUT	
+        // MENU HAUT
         // -------------------------
-        this.panelMenu.setBounds(200, 10, 500, 40);
+        this.panelMenu.setBounds(50, 10, 800, 40);
         this.panelMenu.setBackground(Color.decode("#4D61F4"));
-        this.panelMenu.setLayout(new GridLayout(1, 2, 10, 10));
-  
+        this.panelMenu.setLayout(new GridLayout(1, 7, 10, 10));
+
         this.panelMenu.add(this.btAjouterMedecin);
         this.panelMenu.add(this.btGestionRdv);
         this.panelMenu.add(this.btGestionCreneau);
         this.panelMenu.add(this.btAjouterPatient);
+        this.panelMenu.add(this.btListeMedecins);
+        this.panelMenu.add(this.btListePatients);
         this.panelMenu.add(this.btDeconnexion);
 
         this.add(this.panelMenu);
 
+        // Listeners
         this.btDeconnexion.addActionListener(this);
         this.btAjouterMedecin.addActionListener(this);
         this.btAjouterPatient.addActionListener(this);
         this.btGestionRdv.addActionListener(this);
         this.btGestionCreneau.addActionListener(this);
-
+        this.btListeMedecins.addActionListener(this);
+        this.btListePatients.addActionListener(this);
 
         // -------------------------
         // PANEL ACCUEIL
@@ -95,15 +101,23 @@ public class VueGenerale extends JFrame implements ActionListener {
             this.dispose();
             new VueConnexion();
         }
-        
+
         if (e.getSource() == this.btGestionRdv) {
             this.dispose();
             new VueGestionRdv(this.unUser);
         }
+
         if (e.getSource() == this.btGestionCreneau) {
             this.dispose();
             new VueGestionCreneau(this.unUser);
         }
 
+        if (e.getSource() == this.btListeMedecins) {
+            new VueListeMedecins(this.unUser);
+        }
+
+        if (e.getSource() == this.btListePatients) {
+            new VueListePatients(this.unUser);
+        }
     }
 }
