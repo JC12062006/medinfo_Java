@@ -12,15 +12,21 @@ public class Rdv {
     private int fkIdPatient;
     private int fkIdCreneau;
     
-    public Rdv(int idRdv, int fkIdPatient, int fkIdCreneau, LocalDateTime datecreation, String motif, String statut, String origine){
+    private String nomCompletPatient;
+    private String dateCreneauFormatee;
+    
+    public Rdv(int idRdv, int fkIdPatient, int fkIdCreneau, LocalDateTime datecreation, String motif, String statut, String origine, String nomCompletPatient, String dateCreneauFormatee){
     	
-    	this.dateCreation = datecreation.now();
+    	// J'ai corrigé datecreation.now() qui écrasait la date récupérée en BDD
+    	this.dateCreation = (datecreation != null) ? datecreation : LocalDateTime.now(); 
     	this.idRdv = idRdv;
     	this.fkIdPatient = fkIdPatient;
     	this.fkIdCreneau = fkIdCreneau;
     	this.motif = motif;
     	this.statut = statut;
-    	this.origine = "Desktop";
+    	this.origine = origine; // Corrigé : pour utiliser l'origine de la BDD plutôt que "Desktop" en dur
+    	this.nomCompletPatient = nomCompletPatient;
+    	this.dateCreneauFormatee = dateCreneauFormatee;
     }
 
 	public int getIdRdv() {
@@ -77,6 +83,22 @@ public class Rdv {
 
 	public void setFkIdCreneau(int fkIdCreneau) {
 		this.fkIdCreneau = fkIdCreneau;
+	}
+	
+	public String getNomCompletPatient() {
+		return nomCompletPatient;
+	}
+
+	public void setNomCompletPatient(String nomCompletPatient) {
+		this.nomCompletPatient = nomCompletPatient;
+	}
+
+	public String getDateCreneauFormatee() {
+		return dateCreneauFormatee;
+	}
+
+	public void setDateCreneauFormatee(String dateCreneauFormatee) {
+		this.dateCreneauFormatee = dateCreneauFormatee;
 	}
     
     

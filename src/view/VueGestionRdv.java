@@ -35,11 +35,12 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	private JPanel panelForm = new JPanel();
 
 	private JTextField txtMotif = new JTextField();
+	
 	// J'ajoute les champs pour le filtre qui manquaient dans tes déclarations
 	private JTextField txtFiltre = new JTextField(); 
 	private JButton btFiltrer = new JButton("Filtrer");
 	
-	// Les comboboxs (j'ai retiré le "static" de cbxStatut)
+	// Les comboboxs 
 	private JComboBox<String> cbxPatients = new JComboBox<String>();
 	private JComboBox<String> cbxStatut;
 	
@@ -62,19 +63,20 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		
 		this.setTitle("Gestion des Rendez-vous");
 	    this.setBounds(200, 100, 1000, 500); // Taille et position de la fenêtre
+	 // Mettre la fenêtre en plein écran
+	    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	    this.setLayout(null);
 	    this.getContentPane().setBackground(Color.decode("#4D61F4"));
 	    
-	    this.btRetour.setBounds(50, 20, 150, 30);
-		
+	    this.btRetour.setBounds(50, 20, 200, 40);		
 		// Remplir la Combobox avec les status 
 		String[] lesStatuts = {"Sélectionner un statut", "À Confirmer", "Confirmé", "Annulé", "Honoré"};
 		cbxStatut = new JComboBox<>(lesStatuts);
 		
 		// --- Panel Formulaire ---
-		this.panelForm.setBounds(50, 120, 350, 300);
+		this.panelForm.setBounds(50, 120, 500, 500);
 		this.panelForm.setBackground(Color.decode("#4D61F4"));
-		this.panelForm.setLayout(new GridLayout(7, 2, 20, 20));
+		this.panelForm.setLayout(new GridLayout(7, 2, 20, 40));
 		
 		this.panelForm.add(new JLabel("Patient (Saisie) : "));
 		this.panelForm.add(this.cbxPatients);
@@ -130,7 +132,7 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		});
 		
 		// Remplissage initial de la combobox
-		rafraichirCbxPatients("");
+			
 		// On force le texte affiché par défaut (astuce possible car la combobox est Editable)
 		cbxPatients.setSelectedItem("Sélectionner un patient");
 				
@@ -141,17 +143,24 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 		this.btRetour.addActionListener(this); 
 		this.txtMotif.addKeyListener(this);
 		
+		// --- Barre de recherche (Filtre) ---
+		this.txtFiltre.setBounds(700, 80, 400, 40);
+		this.btFiltrer.setBounds(1120, 80, 150, 40);
+		this.btFiltrer.addActionListener(this); 
+		this.add(this.txtFiltre);
+		this.add(this.btFiltrer);
+		
 		// --- JTable ---
-		// J'ai réaligné les en-têtes avec ta méthode obtenirDonnees()
-		String entetes [] = {"ID Rdv", "Motif", "Origine", "Statut", "ID Patient", "ID Créneau"};
+		String entetes [] = {"ID Rdv", "Motif", "Origine", "Statut", "Patient", "Créneau"};
 		
 		this.unTableau = new Tableau(obtenirDonnees(""), entetes);
 		this.tableRdv = new JTable(this.unTableau);
 		
 		this.scrollRdv = new JScrollPane(this.tableRdv);
 		this.scrollRdv.setBackground(Color.decode("#4D61F4"));
-		this.scrollRdv.setBounds(450, 160, 500, 220);
+		this.scrollRdv.setBounds(700, 150, 800, 500);
 		this.add(this.scrollRdv);
+		this.tableRdv.setRowHeight(30);
 		
 		this.tableRdv.addMouseListener(new MouseListener() {
 			@Override public void mouseReleased(MouseEvent e) {}
@@ -161,47 +170,34 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int numLigne = tableRdv.getSelectedRow();
-				
-				// Remplissage du motif (Colonne 1)
-				txtMotif.setText(unTableau.getValueAt(numLigne, 1).toString());
+			    int numLigne = tableRdv.getSelectedRow();
+			    
+			    // Remplissage du motif (Colonne 1)
+			    txtMotif.setText(unTableau.getValueAt(numLigne, 1).toString());
 
-				// Remplissage du statut (Colonne 3)
-				String statutBdd = unTableau.getValueAt(numLigne, 3).toString();
-
-				// On parcourt tous les éléments de la combobox Statut
-				for (int i = 0; i < cbxStatut.getItemCount(); i++) {
-				    String itemCbx = cbxStatut.getItemAt(i);
-				    
-				    // Cas spécial : si la BDD dit "a_confirmer", on veut sélectionner "À Confirmer"
-				    if (statutBdd.equalsIgnoreCase("a_confirmer") && itemCbx.equals("À Confirmer")) {
-				        cbxStatut.setSelectedIndex(i);
-				        break; // On a trouvé, on arrête de chercher
-				    } 
-				    // Pour les autres ("confirmé", "annulé", "honoré"), on compare en ignorant les majuscules/minuscules
-				    else if (itemCbx.equalsIgnoreCase(statutBdd)) {
-				        cbxStatut.setSelectedIndex(i);
-				        break; // On a trouvé, on arrête de chercher
-				    }
-				}
-				
-				// Remplissage du combobox Patient (Colonne 4)
-				String idPatientTable = unTableau.getValueAt(numLigne, 4).toString();
-				for(int i=0; i < cbxPatients.getItemCount(); i++) {
-					String item = cbxPatients.getItemAt(i);
-					if(item != null && item.startsWith(idPatientTable + " -")) {
-						cbxPatients.setSelectedIndex(i);
-						break;
-					}
-				}
-				
-				btModifier.setEnabled(true);
-				btSupprimer.setEnabled(true);
+			    // Remplissage du statut (Colonne 3)
+			    String statutTable = unTableau.getValueAt(numLigne, 3).toString();
+			    // Petite conversion car la BDD dit "a_confirmer" et l'interface "À Confirmer"
+			    if (statutTable.equals("a_confirmer") || statutTable.equals("À Confirmer")) {
+			        cbxStatut.setSelectedItem("À Confirmer");
+			    } else {
+			        // La première lettre en majuscule pour que ça matche (ex: "confirmé" -> "Confirmé")
+			        statutTable = statutTable.substring(0, 1).toUpperCase() + statutTable.substring(1).toLowerCase();
+			        cbxStatut.setSelectedItem(statutTable);
+			    }
+			    
+			    // Remplissage du combobox Patient (Colonne 4)
+			    String patientTable = unTableau.getValueAt(numLigne, 4).toString();
+			    cbxPatients.setSelectedItem(patientTable);
+			    
+			    btModifier.setEnabled(true);
+			    btSupprimer.setEnabled(true);
 			}
 		});
 			
 		// --- Compteur ---
-		this.lbNbRdv.setBounds(500, 400, 400, 20);
+		this.lbNbRdv.setBounds(700, 670, 400, 30);
+		this.lbNbRdv.setForeground(Color.WHITE); // Pour qu'il soit lisible sur le fond bleu
 		this.lbNbRdv.setText("Nombre de rendez-vous : " + unTableau.getRowCount());
 		this.add(this.lbNbRdv);
 		
@@ -235,8 +231,10 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 			matrice[i][1] = unRdv.getMotif();
 			matrice[i][2] = unRdv.getOrigine();
 			matrice[i][3] = unRdv.getStatut();
-			matrice[i][4] = unRdv.getFkIdPatient();
-			matrice[i][5] = unRdv.getFkIdCreneau(); 
+            // On concatène l'ID et le nom pour coller au format de ta combobox !
+			matrice[i][4] = unRdv.getNomCompletPatient();
+            // On affiche la belle date
+			matrice[i][5] = unRdv.getDateCreneauFormatee(); 
 			i++;
 		}
 		return matrice;
@@ -276,11 +274,11 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	        JOptionPane.showMessageDialog(this, "Veuillez remplir le motif.");
 	        return; // On arrête la méthode ici
 	    } 
-	    if (statut.equals("-- Sélectionner un statut --")) {
+	    if (statut.equals("Sélectionner un statut")) {
 	        JOptionPane.showMessageDialog(this, "Veuillez choisir un statut valide.");
 	        return;
 	    }
-	    if (chainePatient.equals("-- Sélectionner un patient --") || !chainePatient.contains(" - ")) {
+	    if (chainePatient.equals("Sélectionner un patient") || !chainePatient.contains(" - ")) {
 	        JOptionPane.showMessageDialog(this, "Veuillez sélectionner un patient dans la liste.");
 	        return;
 	    }
@@ -289,8 +287,7 @@ public class VueGestionRdv extends JFrame implements ActionListener, KeyListener
 	    String tab[] = chainePatient.split(" - ");
 	    int idPatient = Integer.parseInt(tab[0]);
 	    
-	    // On suppose que tu récupères l'origine et l'idCreneau ailleurs
-	    Rdv unRdv = new Rdv(idRdv, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet");
+	    Rdv unRdv = new Rdv(idRdv, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet", "", "");	    
 	    
 	    ControllerRdv.updateRdv(unRdv);
 	    JOptionPane.showMessageDialog(this, "Le RDV a été modifié avec succès !");

@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import controller.Rdv;
@@ -27,42 +28,67 @@ public class ModelRdv {
 	}
     
 	public static ArrayList<Rdv> selectAllRdv(String filtre) {
-	    	
-	    	ArrayList<Rdv> lesPatients = new ArrayList<Rdv>();
-	    	
-	    	String requete;
+	    ArrayList<Rdv> lesRdv = new ArrayList<Rdv>();
+	    String requete;
 	    		
-	    	if(filtre == ""){
-	    		requete = "SELECT * FROM rendez_vous";
-	    	}else {
-	    		requete = "SELECT p.*, u.* "
-								+ "FROM patient p "
-						        + "INNER JOIN utilisateur u ON p.fk_id_utilisateur = u.id_utilisateur "
-						        + "ORDER BY u.nom, u.prenom "
-						        + "WHERE u.nom LIKE '%"+filtre+"%' OR u.prenom LIKE '%"+filtre+"%'";
-	    	}
-	
-	        try {
-	            uneBdd.seConnecter();
-	            Statement unStat = uneBdd.getMaConnexion().createStatement();
-	            ResultSet desResultats = unStat.executeQuery(requete);
-	
-	            while (desResultats.next()) {
-					Rdv unPatient = new Rdv(desResultats.getInt("id_rdv"), desResultats.getInt("fk_id_patient"), desResultats.getInt("fk_id_creneau"), 
-											desResultats.getObject("date_creation", LocalDateTime.class), desResultats.getString("motif"), desResultats.getString("statut"), desResultats.getString("origine"));
-					
-					//ajout de la promotion dans l'ArrayList
-					lesPatients.add(unPatient);
-				}
-				unStat.close();
-				uneBdd.seDeconnecter();
-	
-	        } catch (SQLException exp) {
-	            System.out.println("Erreur d'exécution : " + requete);
-	        }
-	
-	        return lesPatients;
+	    if(filtre.equals("")){
+            // Jointure pour tout récupérer
+	    	requete = "SELECT r.*, u.nom, u.prenom, c.date_heure_debut " +
+                      "FROM rendez_vous r " +
+                      "INNER JOIN patient p ON r.fk_id_patient = p.id_patient " +
+                      "INNER JOIN utilisateur u ON p.fk_id_utilisateur = u.id_utilisateur " +
+                      "INNER JOIN creneau c ON r.fk_id_creneau = c.id_creneau " +
+                      "ORDER BY c.date_heure_debut ASC";
+	    } else {
+            // Jointure avec la barre de recherche
+	    	requete = "SELECT r.*, u.nom, u.prenom, c.date_heure_debut " +
+                      "FROM rendez_vous r " +
+                      "INNER JOIN patient p ON r.fk_id_patient = p.id_patient " +
+                      "INNER JOIN utilisateur u ON p.fk_id_utilisateur = u.id_utilisateur " +
+                      "INNER JOIN creneau c ON r.fk_id_creneau = c.id_creneau " +
+                      "WHERE u.nom LIKE '%" + filtre + "%' OR u.prenom LIKE '%" + filtre + "%' " +
+                      "ORDER BY c.date_heure_debut ASC";
 	    }
+	
+        try {
+            uneBdd.seConnecter();
+            Statement unStat = uneBdd.getMaConnexion().createStatement();
+            ResultSet desResultats = unStat.executeQuery(requete);
+
+            // Formateur de date pour le créneau
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm");
+	
+            while (desResultats.next()) {
+                // 1. Concaténer nom et prénom
+                String nomComplet = desResultats.getString("nom") + " " + desResultats.getString("prenom");
+                
+                // 2. Récupérer et formater la date du créneau
+                LocalDateTime dateDebut = desResultats.getObject("date_heure_debut", LocalDateTime.class);
+                String dateFormatee = (dateDebut != null) ? dateDebut.format(formatter) : "Date inconnue";
+
+                Rdv unRdv = new Rdv(
+                    desResultats.getInt("id_rdv"), 
+                    desResultats.getInt("fk_id_patient"), 
+                    desResultats.getInt("fk_id_creneau"), 
+                    desResultats.getObject("date_creation", LocalDateTime.class), 
+                    desResultats.getString("motif"), 
+                    desResultats.getString("statut"), 
+                    desResultats.getString("origine"),
+                    nomComplet,        // <-- Nouvel argument
+                    dateFormatee       // <-- Nouvel argument
+                );
+                
+                lesRdv.add(unRdv);
+            }
+            unStat.close();
+            uneBdd.seDeconnecter();
+	
+        } catch (SQLException exp) {
+            System.out.println("Erreur d'exécution : " + requete);
+        }
+	
+        return lesRdv;
+    }	
 	
 	public static void updateRdv(Rdv unRdv) {
 	    // On construit la chaîne de caractères avec les valeurs de l'objet unRdv
