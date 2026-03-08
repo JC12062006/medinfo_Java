@@ -67,7 +67,7 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
         this.add(btActualiser);
 
         // Tableau
-        String entetes[] = {"ID", "Début", "Fin", "Statut", "Dispo", "Médecin", "Salle"};
+        String entetes[] = {"ID", "Jour", "Début", "Fin", "Statut", "Dispo", "Medecin", "Salle"};
 
         this.unTableau = new Tableau(obtenirDonnees(""), entetes);
         this.tableCreneaux = new JTable(this.unTableau);
@@ -93,17 +93,18 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
 
     public Object[][] obtenirDonnees(String filtre) {
         ArrayList<Creneau> lesCreneaux = ControllerCreneau.selectAllCreneaux(filtre);
-        Object matrice[][] = new Object[lesCreneaux.size()][7];
+        Object matrice[][] = new Object[lesCreneaux.size()][8];
 
         int i = 0;
         for (Creneau unC : lesCreneaux) {
             matrice[i][0] = unC.getId_creneau();
-            matrice[i][1] = unC.getDate_heure_debut();
-            matrice[i][2] = unC.getDate_heure_fin();
-            matrice[i][3] = unC.getStatut();
-            matrice[i][4] = unC.isDisponibilite();
-            matrice[i][5] = unC.getFk_id_medecin();
-            matrice[i][6] = unC.getFk_id_salle();
+            matrice[i][1] = unC.getDate_jour();
+            matrice[i][2] = unC.getHeure_debut();
+            matrice[i][3] = unC.getHeure_fin();
+            matrice[i][4] = unC.getStatut();
+            matrice[i][5] = unC.isDisponibilite();
+            matrice[i][6] = unC.getNom_medecin()+" "+ unC.getPrenom_medecin();
+            matrice[i][7] = unC.getSalle();
             i++;
         }
         return matrice;
