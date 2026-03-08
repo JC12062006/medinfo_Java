@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import controller.User;
 
@@ -36,7 +38,12 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.unUser = unUser;
 
         this.setTitle("MedInfo - Espace Secrétaire");
-        this.setBounds(300, 100, 900, 500);
+     // On définit la taille exacte de l'intérieur de la fenêtre
+        this.getContentPane().setPreferredSize(new java.awt.Dimension(900, 500));
+        // On demande à la fenêtre de s'adapter à cette taille intérieure
+        this.pack();
+        // On place la fenêtre à l'écran (remplace le x=300, y=100)
+        this.setLocation(300, 100);
         this.setLayout(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -45,9 +52,12 @@ public class VueGenerale extends JFrame implements ActionListener {
         // -------------------------
         // MENU HAUT
         // -------------------------
-        this.panelMenu.setBounds(50, 10, 800, 40);
+        // Hauteur passée de 40 à 80 pour laisser la place à 2 lignes
+        this.panelMenu.setBounds(50, 10, 800, 80); 
         this.panelMenu.setBackground(Color.decode("#4D61F4"));
-        this.panelMenu.setLayout(new GridLayout(1, 7, 10, 10));
+        
+        // Passage sur 2 lignes et 4 colonnes (les boutons respirent !)
+        this.panelMenu.setLayout(new GridLayout(2, 4, 10, 10));
 
         this.panelMenu.add(this.btAjouterMedecin);
         this.panelMenu.add(this.btGestionRdv);
@@ -71,17 +81,26 @@ public class VueGenerale extends JFrame implements ActionListener {
         // -------------------------
         // PANEL ACCUEIL
         // -------------------------
-        this.panelAccueil.setBounds(50, 80, 800, 350);
+        // Descendu un peu (Y passe de 80 à 110) pour compenser la taille du menu
+        this.panelAccueil.setBounds(50, 110, 800, 320); 
         this.panelAccueil.setBackground(Color.decode("#4D61F4"));
         this.panelAccueil.setLayout(null);
 
         this.lbBienvenue.setText(
-                "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom() + " (Secrétaire)"
+                "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom()
         );
-        this.lbBienvenue.setBounds(200, 50, 500, 30);
+        
+        // Embellissement du message
+        this.lbBienvenue.setFont(new Font("Arial", Font.BOLD, 24)); // Police plus grande et en gras
+        this.lbBienvenue.setForeground(Color.WHITE); // Texte en blanc
+        this.lbBienvenue.setHorizontalAlignment(SwingConstants.CENTER); // Centrage parfait
+        this.lbBienvenue.setBounds(0, 100, 800, 40); // Prend toute la largeur du panel pour centrer correctement
 
         this.panelAccueil.add(this.lbBienvenue);
         this.add(this.panelAccueil);
+        
+        //ajout du footer.
+        this.add(new PanelFooter());
 
         this.setVisible(true);
     }

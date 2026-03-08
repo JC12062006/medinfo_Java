@@ -106,11 +106,24 @@ public class VueConnexion extends JFrame implements ActionListener, KeyListener 
             if (unUser == null) {
                 JOptionPane.showMessageDialog(this, "Identifiants incorrects");
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom());
+                // --- NOUVELLE VÉRIFICATION DU RÔLE ICI ---
+                String role = unUser.getRole();
+                
+                // Si l'utilisateur est un Médecin ou un Patient, on bloque l'accès
+                if (role.equalsIgnoreCase("Medecin") || role.equalsIgnoreCase("Patient")) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Accès refusé : Cette application est réservée au personnel administratif.", 
+                        "Erreur d'accès", 
+                        JOptionPane.ERROR_MESSAGE);
+                } 
+                // Sinon (c'est un Admin ou un(e) Secrétaire), on autorise la connexion
+                else {
+                    JOptionPane.showMessageDialog(this,
+                            "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom());
 
-                this.dispose();
-                new VueGenerale(unUser);
+                    this.dispose();
+                    new VueGenerale(unUser);
+                }
             }
         }
     }
