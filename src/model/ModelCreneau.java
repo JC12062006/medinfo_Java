@@ -19,14 +19,44 @@ public static ArrayList<Creneau> selectAllCreneaux(String filtre) {
     String requete;
 
     if (filtre == null || filtre.equals("")) {
-        requete = "SELECT * FROM creneau";
+        requete =
+            "SELECT c.id_creneau, " +
+            "DATE(c.date_heure_debut) AS date_jour, " +
+            "TIME(c.date_heure_debut) AS heure_debut, " +
+            "TIME(c.date_heure_fin) AS heure_fin, " +
+            "c.statut, c.disponibilite, " +
+            "u.nom AS nom_medecin, u.prenom AS prenom_medecin, " +
+            "s.libelle AS salle " +
+            "FROM creneau c " +
+            "JOIN medecin m ON c.fk_id_medecin = m.id_medecin " +
+            "JOIN utilisateur u ON m.fk_id_utilisateur = u.id_utilisateur " +
+            "JOIN salle s ON c.fk_id_salle = s.id_salle " +
+            "ORDER BY c.date_heure_debut";
     } else {
-        requete = "SELECT * FROM creneau "
-                + "WHERE statut LIKE '%" + filtre + "%' "
-                + "OR fk_id_medecin LIKE '%" + filtre + "%' "
-                + "OR fk_id_salle LIKE '%" + filtre + "%' "
-                + "ORDER BY date_heure_debut";
+        requete =
+            "SELECT c.id_creneau, " +
+            "DATE(c.date_heure_debut) AS date_jour, " +
+            "TIME(c.date_heure_debut) AS heure_debut, " +
+            "TIME(c.date_heure_fin) AS heure_fin, " +
+            "c.statut, c.disponibilite, " +
+            "u.nom AS nom_medecin, u.prenom AS prenom_medecin, " +
+            "s.libelle AS salle " +
+            "FROM creneau c " +
+            "JOIN medecin m ON c.fk_id_medecin = m.id_medecin " +
+            "JOIN utilisateur u ON m.fk_id_utilisateur = u.id_utilisateur " +
+            "JOIN salle s ON c.fk_id_salle = s.id_salle " +
+            "WHERE " +
+            "u.nom LIKE '%" + filtre + "%' OR " +
+            "u.prenom LIKE '%" + filtre + "%' OR " +
+            "s.libelle LIKE '%" + filtre + "%' OR " +
+            "c.statut LIKE '%" + filtre + "%' OR " +
+            "DATE(c.date_heure_debut) LIKE '%" + filtre + "%' OR " +
+            "(c.disponibilite = 1 AND 'true' LIKE '%" + filtre + "%') OR " +
+            "(c.disponibilite = 0 AND 'false' LIKE '%" + filtre + "%') " +
+            "ORDER BY c.date_heure_debut";
     }
+
+
 
     try {
         uneBdd.seConnecter();
@@ -34,14 +64,17 @@ public static ArrayList<Creneau> selectAllCreneaux(String filtre) {
         ResultSet desResultats = unStat.executeQuery(requete);
 
         while (desResultats.next()) {
+
             Creneau unCreneau = new Creneau(
                 desResultats.getInt("id_creneau"),
-                desResultats.getTimestamp("date_heure_debut").toLocalDateTime(),
-                desResultats.getTimestamp("date_heure_fin").toLocalDateTime(),
+                desResultats.getDate("date_jour").toLocalDate(),
+                desResultats.getTime("heure_debut").toLocalTime(),
+                desResultats.getTime("heure_fin").toLocalTime(),
                 desResultats.getString("statut"),
                 desResultats.getBoolean("disponibilite"),
-                desResultats.getInt("fk_id_medecin"),
-                desResultats.getInt("fk_id_salle")
+                desResultats.getString("nom_medecin"),
+                desResultats.getString("prenom_medecin"),
+                desResultats.getString("salle")
             );
 
             lesCreneaux.add(unCreneau);
@@ -55,6 +88,7 @@ public static ArrayList<Creneau> selectAllCreneaux(String filtre) {
     }
 
     return lesCreneaux;
+
 	}
 }
 
