@@ -29,6 +29,7 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
     private JButton btFiltrer = new JButton("Filtrer");
     private JButton btActualiser = new JButton("Actualiser");
     private JButton btRetour = new JButton("Retour à l'accueil");
+    private JButton btGenerer = new JButton("Générer Planning");
 
     private JTable tableCreneaux;
     private JScrollPane scroll;
@@ -66,6 +67,9 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
         this.btActualiser.setBounds(410, 100, 120, 30);
         this.add(btActualiser);
 
+        this.btGenerer.setBounds(550, 100, 150, 30);
+        this.add(this.btGenerer);
+
         // Tableau
         String entetes[] = {"ID", "Jour", "Début", "Fin", "Statut", "Dispo", "Medecin", "Salle"};
 
@@ -87,6 +91,8 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
         this.btActualiser.addActionListener(this);
         this.btRetour.addActionListener(this);
         this.txtFiltre.addKeyListener(this);
+        this.btGenerer.addActionListener(this);
+
 
         this.setVisible(true);
     }
@@ -126,6 +132,10 @@ public class VueGestionCreneau extends JFrame implements ActionListener, KeyList
         else if (e.getSource() == this.btRetour) {
             this.dispose();
             new VueGenerale(this.unUser);
+        }
+        else if (e.getSource() == this.btGenerer) {
+            this.dispose(); // On ferme la vue actuelle
+            new VueGenerationCreneau(this.unUser); // On ouvre le nouveau formulaire
         }
     }
 
