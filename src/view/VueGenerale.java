@@ -46,7 +46,7 @@ public class VueGenerale extends JFrame implements ActionListener {
         this.setLocation(300, 100);
         this.setLayout(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(false);
+        this.setResizable(true);
         this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // -------------------------
