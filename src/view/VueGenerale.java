@@ -1,144 +1,119 @@
 package view;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import controller.User;
 
 public class VueGenerale extends JFrame implements ActionListener {
 
     private User unUser;
 
-    private JPanel panelMenu = new JPanel();
-    private JButton btDeconnexion = new JButton("Déconnexion");
-
-    private JButton btAjouterMedecin = new JButton("Ajouter un médecin");
-    private JButton btAjouterPatient = new JButton("Ajouter un patient");
-    private JButton btGestionRdv = new JButton("Gestion Rdv");
-    private JButton btGestionCreneau = new JButton("Gestion Créneaux");
-
-    // Nouveaux boutons
+    // Panels structurels
+    private JPanel panelNord = new JPanel();
+    private JPanel panelCentral = new JPanel();
+    
+    // Boutons organisés par groupes
+    private JButton btAjouterMedecin = new JButton("Médecin");
+    private JButton btAjouterPatient = new JButton("Patient");
     private JButton btListeMedecins = new JButton("Liste Médecins");
     private JButton btListePatients = new JButton("Liste Patients");
+    private JButton btGestionRdv = new JButton("Gestion Rdv");
+    private JButton btGestionCreneau = new JButton("Créneaux");
+    private JButton btDeconnexion = new JButton("Deconnexion");
 
-    private JPanel panelAccueil = new JPanel();
     private JLabel lbBienvenue = new JLabel();
 
     public VueGenerale(User unUser) {
-
         this.unUser = unUser;
 
         this.setTitle("MedInfo - Espace Secrétaire");
-     // On définit la taille exacte de l'intérieur de la fenêtre
-        this.getContentPane().setPreferredSize(new java.awt.Dimension(900, 500));
-        // On demande à la fenêtre de s'adapter à cette taille intérieure
-        this.pack();
-        // On place la fenêtre à l'écran (remplace le x=300, y=100)
-        this.setLocation(300, 100);
-        this.setLayout(null);
+        this.setMinimumSize(new Dimension(900, 600));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(true);
+        this.setLocationRelativeTo(null); // Centre la fenêtre au démarrage
+        
+        // Utilisation du BorderLayout pour le responsive
+        this.setLayout(new BorderLayout());
         this.getContentPane().setBackground(Color.decode("#4D61F4"));
 
         // -------------------------
-        // MENU HAUT
+        // 1. LE MENU (HAUT)
         // -------------------------
-        // Hauteur passée de 40 à 80 pour laisser la place à 2 lignes
-        this.panelMenu.setBounds(50, 10, 800, 80); 
-        this.panelMenu.setBackground(Color.decode("#4D61F4"));
-        
-        // Passage sur 2 lignes et 4 colonnes (les boutons respirent !)
-        this.panelMenu.setLayout(new GridLayout(2, 4, 10, 10));
+        panelNord.setLayout(new BorderLayout());
+        panelNord.setBackground(Color.decode("#4D61F4"));
+        panelNord.setBorder(new EmptyBorder(15, 15, 15, 15)); // Marges internes
 
-        this.panelMenu.add(this.btAjouterMedecin);
-        this.panelMenu.add(this.btGestionRdv);
-        this.panelMenu.add(this.btGestionCreneau);
-        this.panelMenu.add(this.btAjouterPatient);
-        this.panelMenu.add(this.btListeMedecins);
-        this.panelMenu.add(this.btListePatients);
-        this.panelMenu.add(this.btDeconnexion);
+        // Panel pour les boutons de gestion (Grid 2 lignes, 3 colonnes)
+        JPanel gridBoutons = new JPanel(new GridLayout(2, 3, 10, 10));
+        gridBoutons.setOpaque(false);
 
-        this.add(this.panelMenu);
+        // Ajout des boutons dans un ordre logique
+        gridBoutons.add(btAjouterMedecin);
+        gridBoutons.add(btAjouterPatient);
+        gridBoutons.add(btGestionRdv);
+        gridBoutons.add(btListeMedecins);
+        gridBoutons.add(btListePatients);
+        gridBoutons.add(btGestionCreneau);
+
+        // Style pour le bouton déconnexion à part
+        btDeconnexion.setBackground(Color.decode("#E74C3C"));
+        btDeconnexion.setForeground(Color.WHITE);
+        btDeconnexion.setFont(new Font("Arial", Font.BOLD, 12));
+
+        panelNord.add(gridBoutons, BorderLayout.CENTER);
+        panelNord.add(btDeconnexion, BorderLayout.EAST); // Déconnexion isolée à droite
+
+        // -------------------------
+        // 2. ZONE D'ACCUEIL (CENTRE)
+        // -------------------------
+        panelCentral.setLayout(new GridBagLayout()); // Permet un centrage parfait
+        panelCentral.setOpaque(false);
+
+        lbBienvenue.setText("Bienvenue, " + unUser.getPrenom() + " " + unUser.getNom());
+        lbBienvenue.setFont(new Font("Arial", Font.BOLD, 32));
+        lbBienvenue.setForeground(Color.WHITE);
+
+        panelCentral.add(lbBienvenue); // Le GridBagLayout centrera le label par défaut
+
+        // -------------------------
+        // ASSEMBLAGE FINAL
+        // -------------------------
+        this.add(panelNord, BorderLayout.NORTH);
+        this.add(panelCentral, BorderLayout.CENTER);
+        this.add(new PanelFooter(), BorderLayout.SOUTH);
 
         // Listeners
-        this.btDeconnexion.addActionListener(this);
-        this.btAjouterMedecin.addActionListener(this);
-        this.btAjouterPatient.addActionListener(this);
-        this.btGestionRdv.addActionListener(this);
-        this.btGestionCreneau.addActionListener(this);
-        this.btListeMedecins.addActionListener(this);
-        this.btListePatients.addActionListener(this);
-
-        // -------------------------
-        // PANEL ACCUEIL
-        // -------------------------
-        // Descendu un peu (Y passe de 80 à 110) pour compenser la taille du menu
-        this.panelAccueil.setBounds(50, 110, 800, 320); 
-        this.panelAccueil.setBackground(Color.decode("#4D61F4"));
-        this.panelAccueil.setLayout(null);
-
-        this.lbBienvenue.setText(
-                "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom()
-        );
-        
-        // Embellissement du message
-        this.lbBienvenue.setFont(new Font("Arial", Font.BOLD, 24)); // Police plus grande et en gras
-        this.lbBienvenue.setForeground(Color.WHITE); // Texte en blanc
-        this.lbBienvenue.setHorizontalAlignment(SwingConstants.CENTER); // Centrage parfait
-        this.lbBienvenue.setBounds(0, 100, 800, 40); // Prend toute la largeur du panel pour centrer correctement
-
-        this.panelAccueil.add(this.lbBienvenue);
-        this.add(this.panelAccueil);
-        
-        //ajout du footer.
-        this.add(new PanelFooter());
+        this.ajouterEcouteurs();
 
         this.setVisible(true);
     }
 
+    private void ajouterEcouteurs() {
+        JButton[] boutons = {btDeconnexion, btAjouterMedecin, btAjouterPatient, 
+                             btGestionRdv, btGestionCreneau, btListeMedecins, btListePatients};
+        for (JButton btn : boutons) {
+            btn.addActionListener(this);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
 
-        if (e.getSource() == this.btAjouterMedecin) {
-            new VueAjouterMedecin();
-        }
-
-        if (e.getSource() == this.btAjouterPatient) {
-            new VueAjouterPatient();
-        }
-
-        if (e.getSource() == this.btDeconnexion) {
+        // On gère la fermeture de la vue actuelle si nécessaire
+        if (source == btDeconnexion || source == btGestionRdv || 
+            source == btGestionCreneau || source == btListeMedecins || source == btListePatients) {
             this.dispose();
-            new VueConnexion();
         }
 
-        if (e.getSource() == this.btGestionRdv) {
-            this.dispose();
-            new VueGestionRdv(this.unUser);
-        }
-
-        if (e.getSource() == this.btGestionCreneau) {
-            this.dispose();
-            new VueGestionCreneau(this.unUser);
-        }
-
-        if (e.getSource() == this.btListeMedecins) {
-        	this.dispose();
-            new VueListeMedecins(this.unUser);
-        }
-
-        if (e.getSource() == this.btListePatients) {
-        	this.dispose();
-            new VueListePatients(this.unUser);
-        }
+        if (source == btAjouterMedecin) new VueAjouterMedecin();
+        else if (source == btAjouterPatient) new VueAjouterPatient();
+        else if (source == btDeconnexion) new VueConnexion();
+        else if (source == btGestionRdv) new VueGestionRdv(unUser);
+        else if (source == btGestionCreneau) new VueGestionCreneau(unUser);
+        else if (source == btListeMedecins) new VueListeMedecins(unUser);
+        else if (source == btListePatients) new VueListePatients(unUser);
     }
 }
