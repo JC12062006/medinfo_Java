@@ -1,346 +1,247 @@
 package view;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
+import javax.swing.*;
+import javax.swing.border.*;
+import controller.*;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+public class VueGestionRdv extends JFrame implements ActionListener {
 
-import controller.ControllerRdv;
-import controller.ControllerPatient;
-import controller.Patient;
-import controller.Rdv;
-import controller.Tableau;
-import controller.User;
+    private User unUser;
+    
+    // --- Palette de couleurs MedInfo ---
+    private final Color PRIMARY = Color.decode("#4D61F4");
+    private final Color PRIMARY_SOFT = Color.decode("#EEF1FF");
+    private final Color SECONDARY = Color.decode("#D7FF7B");
+    private final Color BG_ALT = Color.decode("#F6F8FC");
+    private final Color TEXT_MAIN = Color.decode("#1F2933");
+    private final Color DANGER = Color.decode("#E53E3E");
+    private final Color BORDER = Color.decode("#E2E8F0");
 
-public class VueGestionRdv extends JFrame implements ActionListener, KeyListener {
-	
-	private User unUser;
-		
-	private JPanel panelForm = new JPanel();
+    private JTextField txtMotif = new JTextField(), txtFiltre = new JTextField();
+    private JComboBox<String> cbxPatients = new JComboBox<>(), cbxStatut;
+    private JButton btAnnuler = new JButton("Vider"), btModifier = new JButton("Enregistrer"), 
+                    btSupprimer = new JButton("Supprimer"), btRetour = new JButton("Menu"), 
+                    btFiltrer = new JButton("Rechercher");
 
-	private JTextField txtMotif = new JTextField();
-	
-	// J'ajoute les champs pour le filtre qui manquaient dans tes déclarations
-	private JTextField txtFiltre = new JTextField(); 
-	private JButton btFiltrer = new JButton("Filtrer");
-	
-	// Les comboboxs 
-	private JComboBox<String> cbxPatients = new JComboBox<String>();
-	private JComboBox<String> cbxStatut;
-	
-	private JButton btAnnuler = new JButton("Annuler");
-	private JButton btModifier = new JButton("Modifier");
-	private JButton btSupprimer = new JButton("Supprimer");
-	private JButton btRetour = new JButton("Retour à l'accueil");
-	
-	private JTable tableRdv;
-	private JScrollPane scrollRdv;
-	private Tableau unTableau;
-	
-	private JLabel lbNbRdv = new JLabel();
-	
-	private ArrayList<Patient> tousLesPatients;
-	
-	public VueGestionRdv(User unUser) {
-		
-		this.unUser = unUser;
-		
-		this.setTitle("Gestion des Rendez-vous");
-	    this.setBounds(200, 100, 1000, 500); // Taille et position de la fenêtre
-	 // Mettre la fenêtre en plein écran
-	    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-	    this.setLayout(null);
-	    this.getContentPane().setBackground(Color.decode("#4D61F4"));
-	    
-	    this.btRetour.setBounds(50, 20, 200, 40);		
-		// Remplir la Combobox avec les status 
-		String[] lesStatuts = {"Sélectionner un statut", "À Confirmer", "Confirmé", "Annulé", "Honoré"};
-		cbxStatut = new JComboBox<>(lesStatuts);
-		
-		// --- Panel Formulaire ---
-		this.panelForm.setBounds(50, 120, 500, 500);
-		this.panelForm.setBackground(Color.decode("#4D61F4"));
-		this.panelForm.setLayout(new GridLayout(7, 2, 20, 40));
-		
-		this.panelForm.add(new JLabel("Patient (Saisie) : "));
-		this.panelForm.add(this.cbxPatients);
-		
-		this.panelForm.add(new JLabel("Statut : "));
-		this.panelForm.add(this.cbxStatut);
-		
-		this.panelForm.add(new JLabel("Motif : "));
-		this.panelForm.add(this.txtMotif);
-		
-		this.panelForm.add(this.btAnnuler);
-		this.panelForm.add(this.btModifier);
-		this.panelForm.add(this.btSupprimer);
-		
-		this.btModifier.setEnabled(false);
-		this.btSupprimer.setEnabled(false);
-		
-		this.add(btRetour);
-		this.add(this.panelForm);
-		
-		this.tousLesPatients = ControllerPatient.selectAllPatientsFiltre("");
-		
-		// --- Saisie Prédictive Patient ---
-		cbxPatients.setEditable(true);
-		JTextField editor = (JTextField) cbxPatients.getEditor().getEditorComponent();
-		
-		editor.addKeyListener(new KeyAdapter() {
-		    @Override
-		    public void keyReleased(KeyEvent e) {
-		    	
-		        // On ignore les flèches de direction et la touche Entrée
-		        if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN 
-		            || e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_LEFT 
-		            || e.getKeyCode() == KeyEvent.VK_RIGHT) {
-		            return;
-		        }
-		        
-		        // On sauvegarde le texte et la position du curseur
-		        String texteSaisi = editor.getText();
-		        int positionCurseur = editor.getCaretPosition(); 
-		        
-		        // On met à jour la liste
-		        rafraichirCbxPatients(texteSaisi);
-		        
-		        // On restaure le texte et la position du curseur pour ne pas gêner la frappe
-		        editor.setText(texteSaisi);
-		        editor.setCaretPosition(positionCurseur);
-		        
-		        if (cbxPatients.getItemCount() > 0) {
-		            cbxPatients.showPopup();
-		        }
-		    }
-		});
-		
-		// Remplissage initial de la combobox
-			
-		// On force le texte affiché par défaut (astuce possible car la combobox est Editable)
-		cbxPatients.setSelectedItem("Sélectionner un patient");
-				
-		// --- Listeners ---
-		this.btAnnuler.addActionListener(this);
-		this.btModifier.addActionListener(this);
-		this.btSupprimer.addActionListener(this);
-		this.btRetour.addActionListener(this); 
-		this.txtMotif.addKeyListener(this);
-		
-		// --- Barre de recherche (Filtre) ---
-		this.txtFiltre.setBounds(700, 80, 400, 40);
-		this.btFiltrer.setBounds(1120, 80, 150, 40);
-		this.btFiltrer.addActionListener(this); 
-		this.add(this.txtFiltre);
-		this.add(this.btFiltrer);
-		
-		// --- JTable ---
-		String entetes [] = {"ID Rdv", "Motif", "Origine", "Statut", "Patient", "Créneau"};
-		
-		this.unTableau = new Tableau(obtenirDonnees(""), entetes);
-		this.tableRdv = new JTable(this.unTableau);
-		
-		this.scrollRdv = new JScrollPane(this.tableRdv);
-		this.scrollRdv.setBackground(Color.decode("#4D61F4"));
-		this.scrollRdv.setBounds(700, 150, 800, 500);
-		this.add(this.scrollRdv);
-		this.tableRdv.setRowHeight(30);
-		
-		this.tableRdv.addMouseListener(new MouseListener() {
-			@Override public void mouseReleased(MouseEvent e) {}
-			@Override public void mousePressed(MouseEvent e) {}
-			@Override public void mouseExited(MouseEvent e) {}
-			@Override public void mouseEntered(MouseEvent e) {}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			    int numLigne = tableRdv.getSelectedRow();
-			    
-			    // Remplissage du motif (Colonne 1)
-			    txtMotif.setText(unTableau.getValueAt(numLigne, 1).toString());
+    private JTable tableRdv;
+    private Tableau unTableau;
+    private JLabel lbNbRdv = new JLabel();
+    private ArrayList<Patient> tousLesPatients;
 
-			    // Remplissage du statut (Colonne 3)
-			    String statutTable = unTableau.getValueAt(numLigne, 3).toString();
-			    // Petite conversion car la BDD dit "a_confirmer" et l'interface "À Confirmer"
-			    if (statutTable.equals("a_confirmer") || statutTable.equals("À Confirmer")) {
-			        cbxStatut.setSelectedItem("À Confirmer");
-			    } else {
-			        // La première lettre en majuscule pour que ça matche (ex: "confirmé" -> "Confirmé")
-			        statutTable = statutTable.substring(0, 1).toUpperCase() + statutTable.substring(1).toLowerCase();
-			        cbxStatut.setSelectedItem(statutTable);
-			    }
-			    
-			    // Remplissage du combobox Patient (Colonne 4)
-			    String patientTable = unTableau.getValueAt(numLigne, 4).toString();
-			    cbxPatients.setSelectedItem(patientTable);
-			    
-			    btModifier.setEnabled(true);
-			    btSupprimer.setEnabled(true);
-			}
-		});
-			
-		// --- Compteur ---
-		this.lbNbRdv.setBounds(700, 670, 400, 30);
-		this.lbNbRdv.setForeground(Color.WHITE); // Pour qu'il soit lisible sur le fond bleu
-		this.lbNbRdv.setText("Nombre de rendez-vous : " + unTableau.getRowCount());
-		this.add(this.lbNbRdv);
-		
-		this.setVisible(true);
-	}
-	
-	// --- Méthode ajoutée pour gérer la saisie prédictive ---
-	public void rafraichirCbxPatients(String filtre) {
-	    cbxPatients.removeAllItems();
-	    
-	    // On met le filtre en minuscules pour que la recherche ne soit pas sensible à la casse
-	    String filtreLower = filtre.toLowerCase();
-	    
-	    // On filtre la liste chargée en mémoire (plus besoin d'interroger la BDD à chaque touche !)
-	    for (Patient unP : this.tousLesPatients) {
-	        String affichage = unP.getIdPatient() + " - " + unP.getNom() + " " + unP.getPrenom();
-	        
-	        // Si le filtre est vide, ou si le nom/prénom contient le texte tapé
-	        if (filtre.isEmpty() || affichage.toLowerCase().contains(filtreLower)) {
-	            cbxPatients.addItem(affichage);
-	        }
-	    }
-	}
-	
-	public Object [][] obtenirDonnees(String filtre){
-		ArrayList<Rdv> lesRdv = ControllerRdv.selectAllRdv(filtre);
-		Object matrice [][] = new Object[lesRdv.size()] [6];
-		int i = 0;
-		for (Rdv unRdv : lesRdv) {
-			matrice[i][0] = unRdv.getIdRdv();
-			matrice[i][1] = unRdv.getMotif();
-			matrice[i][2] = unRdv.getOrigine();
-			matrice[i][3] = unRdv.getStatut();
-            // On concatène l'ID et le nom pour coller au format de ta combobox !
-			matrice[i][4] = unRdv.getNomCompletPatient();
-            // On affiche la belle date
-			matrice[i][5] = unRdv.getDateCreneauFormatee(); 
-			i++;
-		}
-		return matrice;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == this.btAnnuler){
-			this.viderChamps();
-		}
-		else if (e.getSource() == this.btFiltrer) {
-			String filtre = this.txtFiltre.getText();
-			this.unTableau.setDonnees(this.obtenirDonnees(filtre));
-		}
-		else if(e.getSource() == this.btModifier) {
-			this.updateRdv();
-		}
-		else if(e.getSource() == this.btSupprimer) {
-			this.deleteRdv();
-		}
-		else if(e.getSource() == this.btRetour) {
-			this.dispose();
-			new VueGenerale(this.unUser);
-		}
-	}
-	
-	public void updateRdv() {
-	    int numLigne = tableRdv.getSelectedRow();
-	    int idRdv = Integer.parseInt(unTableau.getValueAt(numLigne, 0).toString());
-	    
-	    String motif = this.txtMotif.getText();
-	    String statut = this.cbxStatut.getSelectedItem().toString();
-	    String chainePatient = this.cbxPatients.getSelectedItem().toString();
-	    
-	    // --- VÉRIFICATIONS DE SÉCURITÉ ---
-	    if (motif.equals("")){
-	        JOptionPane.showMessageDialog(this, "Veuillez remplir le motif.");
-	        return; // On arrête la méthode ici
-	    } 
-	    if (statut.equals("Sélectionner un statut")) {
-	        JOptionPane.showMessageDialog(this, "Veuillez choisir un statut valide.");
-	        return;
-	    }
-	    if (chainePatient.equals("Sélectionner un patient") || !chainePatient.contains(" - ")) {
-	        JOptionPane.showMessageDialog(this, "Veuillez sélectionner un patient dans la liste.");
-	        return;
-	    }
-	    
-	    // Si tout est bon, on continue...
-	    String tab[] = chainePatient.split(" - ");
-	    int idPatient = Integer.parseInt(tab[0]);
-	    
-	    Rdv unRdv = new Rdv(idRdv, idPatient, 1, java.time.LocalDateTime.now(), motif, statut, "Cabinet", "", "");	    
-	    
-	    ControllerRdv.updateRdv(unRdv);
-	    JOptionPane.showMessageDialog(this, "Le RDV a été modifié avec succès !");
-	    
-	    this.unTableau.setDonnees(this.obtenirDonnees(""));
-	    this.viderChamps();
-	}
-	
-	public void deleteRdv() {
-		int numLigne = tableRdv.getSelectedRow();
-		int idRdv = Integer.parseInt(unTableau.getValueAt(numLigne, 0).toString());
-		
-		int retour = JOptionPane.showConfirmDialog(this, "Voulez-vous supprimer ce rendez-vous ?", "Suppression", JOptionPane.YES_NO_OPTION);
-		if(retour == 0) {
-			ControllerRdv.deleteRdv(idRdv);
-			JOptionPane.showMessageDialog(this, "Le rendez-vous a été supprimé avec succès.");
-			
-			this.unTableau.setDonnees(this.obtenirDonnees(""));
-			this.lbNbRdv.setText("Nombre de rendez-vous : " + unTableau.getRowCount());
-			this.viderChamps();
-		}
-	}
-	
-	public void viderChamps() {
-	    this.txtMotif.setText("");
-	    
-	    if(this.cbxStatut.getItemCount() > 0) {
-	        // L'index 0 correspond maintenant à "-- Sélectionner un statut --"
-	        this.cbxStatut.setSelectedIndex(0); 
-	    }
-	    
-	    if(this.cbxPatients.getItemCount() > 0) {
-	        // On remet le texte personnalisé pour les patients
-	        this.cbxPatients.setSelectedItem("-- Sélectionner un patient --");
-	    }
-	    
-	    this.btModifier.setEnabled(false);
-	    this.btSupprimer.setEnabled(false);
-	}
+    public VueGestionRdv(User unUser) {
+        this.unUser = unUser;
+        this.setTitle("MedInfo - Gestion des Rendez-vous");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        
+        this.getContentPane().setBackground(BG_ALT);
+        this.setLayout(new BorderLayout());
 
-	@Override public void keyTyped(KeyEvent e) {}
+        // --- 1. HEADER (Barre supérieure blanche) ---
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        header.setPreferredSize(new Dimension(0, 70));
+        header.setBorder(new MatteBorder(0, 0, 1, 0, BORDER));
+        
+        // Logo / Titre à gauche
+        JLabel title = new JLabel("  Gestion des Rendez-vous");
+        title.setFont(new Font("SansSerif", Font.BOLD, 20));
+        title.setForeground(PRIMARY);
+        header.add(title, BorderLayout.WEST);
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ENTER){
-			if(e.getSource() == txtFiltre) {
-				String filtre = this.txtFiltre.getText();
-				this.unTableau.setDonnees(this.obtenirDonnees(filtre));
-			} else {
-				updateRdv();
-			}
-		}
-	}
+        // Recherche à droite
+        JPanel searchZone = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 18));
+        searchZone.setOpaque(false);
+        txtFiltre.setPreferredSize(new Dimension(250, 35));
+        btFiltrer.setBackground(PRIMARY);
+        btFiltrer.setForeground(Color.WHITE);
+        searchZone.add(new JLabel("Rechercher :"));
+        searchZone.add(txtFiltre);
+        searchZone.add(btFiltrer);
+        header.add(searchZone, BorderLayout.EAST);
 
-	@Override public void keyReleased(KeyEvent e) {}
+        this.add(header, BorderLayout.NORTH);
+
+        // --- 2. SIDEBAR (Formulaire à gauche) ---
+        JPanel sidebar = new JPanel(new GridBagLayout());
+        sidebar.setBackground(Color.WHITE);
+        sidebar.setPreferredSize(new Dimension(380, 0));
+        sidebar.setBorder(new EmptyBorder(30, 30, 30, 30));
+        
+        GridBagConstraints g = new GridBagConstraints();
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.insets = new Insets(0, 0, 20, 0);
+        g.gridx = 0; g.weightx = 1;
+
+        // Composants Sidebar
+        ajouterChamp(sidebar, "PATIENT", cbxPatients, g, 0);
+        cbxPatients.setEditable(true);
+        
+        ajouterChamp(sidebar, "STATUT", cbxStatut = new JComboBox<>(new String[]{"Sélectionner...", "À Confirmer", "Confirmé", "Annulé", "Honoré"}), g, 2);
+        ajouterChamp(sidebar, "MOTIF", txtMotif, g, 4);
+
+        // Boutons d'action
+        btModifier.setBackground(SECONDARY);
+        btModifier.setForeground(TEXT_MAIN);
+        btModifier.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btModifier.setPreferredSize(new Dimension(0, 45));
+        g.gridy = 6; sidebar.add(btModifier, g);
+
+        btSupprimer.setBackground(PRIMARY_SOFT);
+        btSupprimer.setForeground(DANGER);
+        btSupprimer.setBorder(new LineBorder(DANGER, 1));
+        g.gridy = 7; sidebar.add(btSupprimer, g);
+
+        btAnnuler.setOpaque(false);
+        btAnnuler.setContentAreaFilled(false);
+        btAnnuler.setBorder(null);
+        g.gridy = 8; sidebar.add(btAnnuler, g);
+
+        this.add(sidebar, BorderLayout.WEST);
+
+        // --- 3. MAIN CONTENT (Tableau) ---
+        JPanel main = new JPanel(new BorderLayout(0, 20));
+        main.setOpaque(false);
+        main.setBorder(new EmptyBorder(30, 40, 30, 40));
+
+        // Tableau stylisé
+        String entetes[] = {"ID", "Motif", "Origine", "Statut", "Patient", "Date & Heure"};
+        this.unTableau = new Tableau(obtenirDonnees(""), entetes);
+        this.tableRdv = new JTable(this.unTableau);
+        this.tableRdv.setRowHeight(45);
+        this.tableRdv.setGridColor(BORDER);
+        this.tableRdv.setSelectionBackground(PRIMARY_SOFT);
+        this.tableRdv.setSelectionForeground(PRIMARY);
+        this.tableRdv.getTableHeader().setBackground(Color.WHITE);
+        this.tableRdv.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+
+        JScrollPane scroll = new JScrollPane(tableRdv);
+        scroll.setBorder(new LineBorder(BORDER, 1));
+        scroll.getViewport().setBackground(Color.WHITE);
+        main.add(scroll, BorderLayout.CENTER);
+
+        // Footer & Retour
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setOpaque(false);
+        lbNbRdv.setText("Total : " + unTableau.getRowCount() + " RDV enregistrés");
+        footer.add(lbNbRdv, BorderLayout.WEST);
+        footer.add(btRetour, BorderLayout.EAST);
+        main.add(footer, BorderLayout.SOUTH);
+
+        this.add(main, BorderLayout.CENTER);
+
+        // --- LOGIQUE ---
+        initLogic();
+        this.setVisible(true);
+    }
+
+    private void ajouterChamp(JPanel p, String label, JComponent field, GridBagConstraints g, int y) {
+        JLabel lb = new JLabel(label);
+        lb.setFont(new Font("SansSerif", Font.BOLD, 11));
+        lb.setForeground(Color.GRAY);
+        g.gridy = y; p.add(lb, g);
+        field.setPreferredSize(new Dimension(0, 40));
+        field.setBackground(BG_ALT);
+        g.gridy = y + 1; p.add(field, g);
+    }
+
+    private void initLogic() {
+        btRetour.addActionListener(this); btAnnuler.addActionListener(this);
+        btModifier.addActionListener(this); btSupprimer.addActionListener(this);
+        btFiltrer.addActionListener(this);
+        btModifier.setEnabled(false); btSupprimer.setEnabled(false);
+
+        tableRdv.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int l = tableRdv.getSelectedRow();
+                txtMotif.setText(unTableau.getValueAt(l, 1).toString());
+                cbxStatut.setSelectedItem(unTableau.getValueAt(l, 3).toString());
+                cbxPatients.setSelectedItem(unTableau.getValueAt(l, 4).toString());
+                btModifier.setEnabled(true); btSupprimer.setEnabled(true);
+            }
+        });
+
+        this.tousLesPatients = ControllerPatient.selectAllPatientsFiltre("");
+        JTextField ed = (JTextField) cbxPatients.getEditor().getEditorComponent();
+        ed.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER) return;
+                rafraichirCbxPatients(ed.getText());
+                if(cbxPatients.getItemCount() > 0) cbxPatients.showPopup();
+            }
+        });
+    }
+
+    // --- Méthodes métier ---
+
+    public void rafraichirCbxPatients(String filtre) {
+        cbxPatients.removeAllItems();
+        String f = filtre.toLowerCase();
+        for (Patient p : this.tousLesPatients) {
+            String aff = p.getIdPatient() + " - " + p.getNom() + " " + p.getPrenom();
+            if (filtre.isEmpty() || aff.toLowerCase().contains(f)) cbxPatients.addItem(aff);
+        }
+    }
+
+    public Object [][] obtenirDonnees(String filtre){
+        ArrayList<Rdv> lesRdv = ControllerRdv.selectAllRdv(filtre);
+        Object matrice [][] = new Object[lesRdv.size()] [6];
+        int i = 0;
+        for (Rdv r : lesRdv) {
+            matrice[i][0] = r.getIdRdv();
+            matrice[i][1] = r.getMotif();
+            matrice[i][2] = r.getOrigine();
+            matrice[i][3] = r.getStatut();
+            matrice[i][4] = r.getNomCompletPatient();
+            matrice[i][5] = r.getDateCreneauFormatee(); 
+            i++;
+        }
+        return matrice;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btRetour) { this.dispose(); new VueGenerale(unUser); }
+        else if (e.getSource() == btAnnuler) viderChamps();
+        else if (e.getSource() == btFiltrer) {
+            unTableau.setDonnees(obtenirDonnees(txtFiltre.getText()));
+            lbNbRdv.setText("Total : " + unTableau.getRowCount() + " RDV");
+        }
+        else if (e.getSource() == btModifier) updateRdv();
+        else if (e.getSource() == btSupprimer) deleteRdv();
+    }
+
+    public void updateRdv() {
+        int l = tableRdv.getSelectedRow();
+        int id = Integer.parseInt(unTableau.getValueAt(l, 0).toString());
+        String m = txtMotif.getText();
+        String s = cbxStatut.getSelectedItem().toString();
+        String p = cbxPatients.getSelectedItem().toString();
+        if (m.isEmpty() || s.contains("Sélect") || !p.contains("-")) return;
+        
+        int idPatient = Integer.parseInt(p.split(" - ")[0]);
+        Rdv r = new Rdv(id, idPatient, 1, java.time.LocalDateTime.now(), m, s, "Cabinet", "", "");        
+        ControllerRdv.updateRdv(r);
+        unTableau.setDonnees(obtenirDonnees(""));
+        viderChamps();
+    }
+
+    public void deleteRdv() {
+        int l = tableRdv.getSelectedRow();
+        int id = Integer.parseInt(unTableau.getValueAt(l, 0).toString());
+        if(JOptionPane.showConfirmDialog(this, "Supprimer ?", "Attention", 0) == 0) {
+            ControllerRdv.deleteRdv(id);
+            unTableau.setDonnees(obtenirDonnees(""));
+            lbNbRdv.setText("Total : " + unTableau.getRowCount() + " RDV");
+            viderChamps();
+        }
+    }
+
+    public void viderChamps() {
+        txtMotif.setText(""); cbxStatut.setSelectedIndex(0);
+        cbxPatients.setSelectedItem(""); btModifier.setEnabled(false); btSupprimer.setEnabled(false);
+    }
 }
