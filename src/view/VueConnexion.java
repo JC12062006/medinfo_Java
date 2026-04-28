@@ -1,143 +1,169 @@
 package view;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
 import controller.ControllerUtilisateur;
+import controller.ControllerStyle;
 import controller.User;
 
 public class VueConnexion extends JFrame implements ActionListener, KeyListener {
 
-    private JPanel panelForm = new JPanel();
-
-    private JButton btAnnuler = new JButton("Annuler");
-    private JButton btValider = new JButton("Connexion");
-    //private JButton btInscription = new JButton("Créer un compte");
-
     private JTextField txtEmail = new JTextField();
     private JPasswordField txtMdp = new JPasswordField();
+    private JButton btAnnuler = new JButton("Vider");
+    private JButton btValider = new JButton("Se connecter");
 
     public VueConnexion() {
-        this.setTitle("MedInfo - Connexion");
-        this.setBounds(600, 200, 600, 350);
-        this.setLayout(null);
+        this.setTitle("MedInfo - Authentification");
+        this.setSize(500, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
+        this.setLocationRelativeTo(null); // Centrer sur l'écran
 
-        this.getContentPane().setBackground(Color.decode("#4D61F4"));
+        // Fond de la fenêtre
+        this.getContentPane().setBackground(ControllerStyle.BG_ALT);
+        this.setLayout(new GridBagLayout()); // Pour centrer la "Carte" de connexion
 
-        // Logo
-        ImageIcon uneImage = new ImageIcon("src/images/logo.png");
-        JLabel imageLogo = new JLabel(uneImage);
-        imageLogo.setBounds(20, 40, 250, 250);
-        this.add(imageLogo);
+        // --- LA CARTE DE CONNEXION (Panel blanc) ---
+        JPanel card = new JPanel();
+        card.setBackground(Color.WHITE);
+        card.setPreferredSize(new Dimension(400, 500));
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(new CompoundBorder(
+            new LineBorder(ControllerStyle.BORDER_SOFT, 1),
+            new EmptyBorder(40, 40, 40, 40)
+        ));
 
-        // Formulaire
-        this.panelForm.setBounds(300, 40, 260, 200);
-        this.panelForm.setBackground(Color.decode("#4D61F4"));
-        this.panelForm.setLayout(new GridLayout(4, 2, 10, 10));
+        // 1. Logo
+        try {
+            ImageIcon icon = new ImageIcon("src/images/logo.png");
+            // Redimensionnement du logo si nécessaire
+            Image img = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+            JLabel lbLogo = new JLabel(new ImageIcon(img));
+            lbLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+            card.add(lbLogo);
+        } catch (Exception e) {
+            JLabel lbLogoText = new JLabel("MedInfo");
+            lbLogoText.setFont(new Font("SansSerif", Font.BOLD, 32));
+            lbLogoText.setForeground(ControllerStyle.PRIMARY);
+            lbLogoText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            card.add(lbLogoText);
+        }
 
-        
-        this.panelForm.add(new JLabel("Email :"));
-        this.panelForm.add(this.txtEmail);
+        card.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        this.panelForm.add(new JLabel("Mot de passe :"));
-        this.panelForm.add(this.txtMdp);
+        // 2. Titre
+        JLabel lbTitre = new JLabel("Connexion Personnel");
+        lbTitre.setFont(new Font("SansSerif", Font.BOLD, 18));
+        lbTitre.setForeground(ControllerStyle.TEXT_MAIN);
+        lbTitre.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(lbTitre);
 
-        this.panelForm.add(this.btAnnuler);
-        this.panelForm.add(this.btValider);
+        card.add(Box.createRigidArea(new Dimension(0, 30)));
 
-       // this.panelForm.add(new JLabel(""));
-       // this.panelForm.add(this.btInscription);
+     // --- 3. Champs de saisie ---
 
-        this.add(this.panelForm);
+     // Label Email
+     JLabel lbEmail = new JLabel("Adresse Email");
+     ControllerStyle.applyFormLabel(lbEmail);
+     lbEmail.setAlignmentX(Component.CENTER_ALIGNMENT); // <-- AJOUTE CECI
+     card.add(lbEmail);
+
+     card.add(Box.createRigidArea(new Dimension(0, 5)));
+
+     // Champ Email
+     ControllerStyle.applyTextField(txtEmail);
+     txtEmail.setMaximumSize(new Dimension(320, 40)); // On fixe une largeur max pour que ce soit beau
+     txtEmail.setAlignmentX(Component.CENTER_ALIGNMENT); // <-- AJOUTE CECI
+     card.add(txtEmail);
+
+     card.add(Box.createRigidArea(new Dimension(0, 20)));
+
+     // Label Mot de passe
+     JLabel lbMdp = new JLabel("Mot de passe");
+     ControllerStyle.applyFormLabel(lbMdp);
+     lbMdp.setAlignmentX(Component.CENTER_ALIGNMENT); // <-- AJOUTE CECI
+     card.add(lbMdp);
+
+     card.add(Box.createRigidArea(new Dimension(0, 5)));
+
+     // Champ Mot de passe
+     ControllerStyle.applyTextField(txtMdp);
+     txtMdp.setMaximumSize(new Dimension(320, 40)); // On fixe la même largeur max
+     txtMdp.setAlignmentX(Component.CENTER_ALIGNMENT); // <-- AJOUTE CECI
+     card.add(txtMdp);
+
+        // 4. Boutons
+        ControllerStyle.applySecondaryBtn(btValider);
+        btValider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btValider.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        card.add(btValider);
+
+        card.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        btAnnuler.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        btAnnuler.setForeground(ControllerStyle.TEXT_MUTED);
+        btAnnuler.setBackground(Color.WHITE);
+        btAnnuler.setBorder(null);
+        btAnnuler.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btAnnuler.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(btAnnuler);
+
+        // Ajout de la carte au centre
+        this.add(card);
 
         // Listeners
-        this.btAnnuler.addActionListener(this);
-        this.btValider.addActionListener(this);
-        // this.btInscription.addActionListener(this);
-
-        this.txtEmail.addKeyListener(this);
-        this.txtMdp.addKeyListener(this);
+        btValider.addActionListener(this);
+        btAnnuler.addActionListener(this);
+        txtEmail.addKeyListener(this);
+        txtMdp.addKeyListener(this);
 
         this.setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        if (e.getSource() == this.btAnnuler) {
-            this.txtEmail.setText("");
-            this.txtMdp.setText("");
+        if (e.getSource() == btAnnuler) {
+            txtEmail.setText("");
+            txtMdp.setText("");
+        } else if (e.getSource() == btValider) {
+            traitementConnexion();
         }
-        else if (e.getSource() == this.btValider) {
-            this.traitementConnexion();
-        }
-        /*else if (e.getSource() == this.btInscription) {
-            // Ouvrir la fenêtre d'inscription
-            this.dispose();
-            new VueInscription();
-        }*/
     }
 
     public void traitementConnexion() {
-        String email = this.txtEmail.getText();
-        String mdp = new String(this.txtMdp.getPassword());
+        String email = txtEmail.getText();
+        String mdp = new String(txtMdp.getPassword());
 
-        if (email.equals("") || mdp.equals("")) {
-            JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs");
+        if (email.isEmpty() || mdp.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs", "Champs vides", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        User unUser = ControllerUtilisateur.selectWhereUser(email, mdp);
+
+        if (unUser == null) {
+            JOptionPane.showMessageDialog(this, "Identifiants incorrects", "Erreur", JOptionPane.ERROR_MESSAGE);
         } else {
-
-            User unUser = ControllerUtilisateur.selectWhereUser(email, mdp);
-
-            if (unUser == null) {
-                JOptionPane.showMessageDialog(this, "Identifiants incorrects");
+            String role = unUser.getRole();
+            if (role.equalsIgnoreCase("Medecin") || role.equalsIgnoreCase("Patient")) {
+                JOptionPane.showMessageDialog(this, 
+                    "Accès refusé : Cette application est réservée au personnel administratif.", 
+                    "Erreur d'accès", JOptionPane.ERROR_MESSAGE);
             } else {
-                // --- NOUVELLE VÉRIFICATION DU RÔLE ICI ---
-                String role = unUser.getRole();
-                
-                // Si l'utilisateur est un Médecin ou un Patient, on bloque l'accès
-                if (role.equalsIgnoreCase("Medecin") || role.equalsIgnoreCase("Patient")) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Accès refusé : Cette application est réservée au personnel administratif.", 
-                        "Erreur d'accès", 
-                        JOptionPane.ERROR_MESSAGE);
-                } 
-                // Sinon (c'est un Admin ou un(e) Secrétaire), on autorise la connexion
-                else {
-                    JOptionPane.showMessageDialog(this,
-                            "Bienvenue " + unUser.getPrenom() + " " + unUser.getNom());
-
-                    this.dispose();
-                    new VueGenerale(unUser);
-                }
+                this.dispose();
+                new VueGenerale(unUser);
             }
         }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            this.traitementConnexion();
-        }
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) traitementConnexion();
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyReleased(KeyEvent e) {}
 }

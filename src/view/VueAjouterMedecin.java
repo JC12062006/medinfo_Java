@@ -3,8 +3,8 @@ package view;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-
 import javax.swing.*;
+import javax.swing.border.*;
 
 import controller.*;
 import model.ModelUtilisateur;
@@ -23,72 +23,135 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
     private JTextArea txtDescription = new JTextArea();
 
     private JComboBox<String> cbxSpecialites = new JComboBox<>();
-    private JCheckBox cbConventionne = new JCheckBox("Conventionné ?");
+    private JCheckBox cbConventionne = new JCheckBox("Praticien conventionné");
 
-    private JButton btValider = new JButton("Valider");
+    private JButton btValider = new JButton("Enregistrer le médecin");
     private JButton btAnnuler = new JButton("Annuler");
 
     public VueAjouterMedecin() {
-
-        this.setTitle("Ajouter un médecin");
-        this.setBounds(400, 150, 600, 650);
-        this.setLayout(new BorderLayout());
+        this.setTitle("MedInfo - Nouveau Médecin");
+        this.setSize(650, 900); // Fenêtre haute pour accommoder le formulaire complet
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
+        this.setLocationRelativeTo(null);
 
-        JPanel panelForm = new JPanel();
-        panelForm.setLayout(new GridLayout(13, 2, 5, 5));
-        panelForm.setBackground(Color.decode("#4D61F4"));
+        this.getContentPane().setBackground(ControllerStyle.BG_ALT);
+        this.setLayout(new BorderLayout());
 
-        panelForm.add(new JLabel("Nom :"));
-        panelForm.add(txtNom);
+        // --- 1. HEADER ---
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
+        header.setBackground(Color.WHITE);
+        header.setBorder(new MatteBorder(0, 0, 1, 0, ControllerStyle.BORDER_SOFT));
+        
+        JLabel titreHead = new JLabel("Ajouter un nouveau Praticien");
+        titreHead.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titreHead.setForeground(ControllerStyle.PRIMARY);
+        header.add(titreHead);
+        
+        this.add(header, BorderLayout.NORTH);
 
-        panelForm.add(new JLabel("Prénom :"));
-        panelForm.add(txtPrenom);
+        // --- 2. CENTRE (Scrollable Card) ---
+        // On utilise un JScrollPane au cas où l'écran de l'utilisateur est petit
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+        
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(new CompoundBorder(
+            new LineBorder(ControllerStyle.BORDER_SOFT, 1),
+            new EmptyBorder(30, 45, 30, 45)
+        ));
 
-        panelForm.add(new JLabel("Email :"));
-        panelForm.add(txtEmail);
+        // Ajout des champs (Identité)
+        ajouterChamp("NOM", txtNom, card);
+        ajouterChamp("PRÉNOM", txtPrenom, card);
+        ajouterChamp("EMAIL", txtEmail, card);
+        ajouterChamp("TÉLÉPHONE", txtTelephone, card);
+        ajouterChamp("DATE DE NAISSANCE (YYYY-MM-DD)", txtDateNaissance, card);
+        
+        // Ajout des champs (Professionnel)
+        ajouterChamp("NUMÉRO RPPS", txtRpps, card);
+        ajouterChamp("FORMATIONS", txtFormations, card);
+        ajouterChamp("LANGUES PARLÉES", txtLangues, card);
+        ajouterChamp("EXPÉRIENCES", txtExperiences, card);
 
-        panelForm.add(new JLabel("Téléphone :"));
-        panelForm.add(txtTelephone);
+        // Spécialité
+        JLabel lbSpe = new JLabel("SPÉCIALITÉ");
+        ControllerStyle.applyFormLabel(lbSpe);
+        lbSpe.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(lbSpe);
+        cbxSpecialites.setMaximumSize(new Dimension(400, 40));
+        cbxSpecialites.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(cbxSpecialites);
+        card.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        panelForm.add(new JLabel("Date naissance (yyyy-mm-dd) :"));
-        panelForm.add(txtDateNaissance);
+        // Description (TextArea)
+        JLabel lbDesc = new JLabel("DESCRIPTION / BIO");
+        ControllerStyle.applyFormLabel(lbDesc);
+        lbDesc.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(lbDesc);
+        txtDescription.setRows(3);
+        txtDescription.setLineWrap(true);
+        txtDescription.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JScrollPane scrollDesc = new JScrollPane(txtDescription);
+        scrollDesc.setMaximumSize(new Dimension(400, 80));
+        scrollDesc.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(scrollDesc);
+        card.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        panelForm.add(new JLabel("RPPS :"));
-        panelForm.add(txtRpps);
+        // Checkbox conventionné
+        cbConventionne.setOpaque(false);
+        cbConventionne.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        cbConventionne.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(cbConventionne);
+        
+        card.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        panelForm.add(new JLabel("Formations :"));
-        panelForm.add(txtFormations);
+        // --- 3. BOUTONS ---
+        ControllerStyle.applySecondaryBtn(btValider);
+        btValider.setMaximumSize(new Dimension(400, 50));
+        btValider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(btValider);
 
-        panelForm.add(new JLabel("Langues parlées :"));
-        panelForm.add(txtLangues);
+        card.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        panelForm.add(new JLabel("Expériences :"));
-        panelForm.add(txtExperiences);
+        btAnnuler.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        btAnnuler.setForeground(ControllerStyle.TEXT_MUTED);
+        btAnnuler.setBorderPainted(false);
+        btAnnuler.setContentAreaFilled(false);
+        btAnnuler.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btAnnuler.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(btAnnuler);
 
-        panelForm.add(new JLabel("Conventionné :"));
-        panelForm.add(cbConventionne);
+        centerWrapper.add(card);
+        
+        // JScrollPane pour permettre le défilement du formulaire si besoin
+        JScrollPane mainScroll = new JScrollPane(centerWrapper);
+        mainScroll.setBorder(null);
+        mainScroll.getVerticalScrollBar().setUnitIncrement(16);
+        this.add(mainScroll, BorderLayout.CENTER);
 
-        panelForm.add(new JLabel("Spécialité :"));
-        panelForm.add(cbxSpecialites);
-
-        panelForm.add(new JLabel("Description :"));
-        panelForm.add(new JScrollPane(txtDescription));
-
-        JPanel panelBoutons = new JPanel();
-        panelBoutons.setBackground(Color.decode("#4D61F4"));
-        panelBoutons.add(btValider);
-        panelBoutons.add(btAnnuler);
-
-        this.add(panelForm, BorderLayout.CENTER);
-        this.add(panelBoutons, BorderLayout.SOUTH);
-
+        // Listeners & Initialisation
         btValider.addActionListener(this);
         btAnnuler.addActionListener(this);
-
         remplirCBX();
 
         this.setVisible(true);
+    }
+
+    private void ajouterChamp(String label, JTextField txt, JPanel container) {
+        JLabel lbl = new JLabel(label);
+        ControllerStyle.applyFormLabel(lbl);
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(lbl);
+        container.add(Box.createRigidArea(new Dimension(0, 5)));
+        ControllerStyle.applyTextField(txt);
+        txt.setMaximumSize(new Dimension(400, 40));
+        txt.setPreferredSize(new Dimension(400, 40));
+        txt.setAlignmentX(Component.CENTER_ALIGNMENT);
+        container.add(txt);
+        container.add(Box.createRigidArea(new Dimension(0, 15)));
     }
 
     public void remplirCBX() {
@@ -101,20 +164,19 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (e.getSource() == btAnnuler) {
             this.dispose();
         }
 
         if (e.getSource() == btValider) {
-
+            // Logique d'insertion identique à ton original
             User u = new User(
-                    txtNom.getText(),
-                    txtPrenom.getText(),
-                    txtEmail.getText(),
-                    txtTelephone.getText(),
-                    ModelUtilisateur.sha1("123"),
-                    txtDateNaissance.getText()
+                txtNom.getText(),
+                txtPrenom.getText(),
+                txtEmail.getText(),
+                txtTelephone.getText(),
+                ModelUtilisateur.sha1("123"),
+                txtDateNaissance.getText()
             );
 
             int idUser = ControllerUtilisateur.insertUtilisateur(u);
@@ -123,24 +185,18 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
             int idSpecialite = Integer.parseInt(item.split(" - ")[0]);
 
             Medecin m = new Medecin(
-                    txtRpps.getText(),
-                    cbConventionne.isSelected() ? 1 : 0,
-                    txtFormations.getText(),
-                    txtLangues.getText(),
-                    txtExperiences.getText(),
-                    txtDescription.getText(),
-                    idUser,
-                    idSpecialite
+                txtRpps.getText(),
+                cbConventionne.isSelected() ? 1 : 0,
+                txtFormations.getText(),
+                txtLangues.getText(),
+                txtExperiences.getText(),
+                txtDescription.getText(),
+                idUser,
+                idSpecialite
             );
 
-            System.out.println(">>> Insertion médecin exécutée");
             ControllerMedecin.insertMedecin(m);
-
-            JOptionPane.showMessageDialog(this,
-                    "Médecin ajouté avec succès",
-                    "Information",
-                    JOptionPane.INFORMATION_MESSAGE);
-
+            JOptionPane.showMessageDialog(this, "Médecin ajouté avec succès !");
             this.dispose();
         }
     }
