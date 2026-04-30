@@ -71,6 +71,7 @@ public class ModelUtilisateur {
     public static int insertUtilisateur(User u) {
         int id = 0;
 
+        // Suppression de 'Medecin' en dur pour utiliser u.getRole()
         String requete = "INSERT INTO utilisateur " +
                 "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
                 "'" + u.getNom() + "', " +
@@ -78,7 +79,7 @@ public class ModelUtilisateur {
                 "'" + u.getEmail() + "', " +
                 "'" + u.getHashPassword() + "', " +
                 "'" + u.getTelephone() + "', " +
-                "'Medecin', " +
+                "'" + u.getRole() + "', " + // Correction ici : on prend le rôle de l'objet User
                 "'" + u.getDateNaissance() + "');";
 
         try {

@@ -14,39 +14,40 @@ public class VueGenerale extends JFrame implements ActionListener {
     private User unUser;
 
     // Boutons de la Sidebar
-    private JButton btGestionRdv = new JButton("📅  Gestion des RDV");
-    private JButton btGestionCreneau = new JButton("⏰  Planning Créneaux");
-    private JButton btListePatients = new JButton("👥  Liste Patients");
-    private JButton btListeMedecins = new JButton("👨‍⚕️  Liste Médecins");
+    private JButton btMonProfil = new JButton("Mon Profil"); // Ajouté
+    private JButton btGestionRdv = new JButton("Gestion des RDV");
+    private JButton btGestionCreneau = new JButton("Planning Créneaux");
+    private JButton btListePatients = new JButton("Liste Patients");
+    private JButton btListeMedecins = new JButton("Liste Médecins");
     private JButton btAjouterPatient = new JButton("➕  Nouveau Patient");
     private JButton btAjouterMedecin = new JButton("➕  Nouveau Médecin");
-    private JButton btDeconnexion = new JButton("🚪  Déconnexion");
+    private JButton btDeconnexion = new JButton("Déconnexion");
 
     public VueGenerale(User unUser) {
         this.unUser = unUser;
 
         this.setTitle("MedInfo - Tableau de bord");
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH); // Plein écran
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
 
-        // --- 1. SIDEBAR (Navigation à gauche) ---
+        // --- 1. SIDEBAR ---
         JPanel sidebar = new JPanel();
         sidebar.setPreferredSize(new Dimension(300, 0));
         sidebar.setBackground(Color.WHITE);
         sidebar.setBorder(new MatteBorder(0, 0, 0, 1, ControllerStyle.BORDER_SOFT));
         sidebar.setLayout(new BorderLayout());
 
-        // Header de la Sidebar (Logo / Titre)
+        // Header Sidebar
         JPanel sideHeader = new JPanel(new GridLayout(2, 1));
         sideHeader.setOpaque(false);
-        sideHeader.setBorder(new EmptyBorder(30, 20, 30, 20));
+        sideHeader.setBorder(new EmptyBorder(30, 25, 30, 20));
         
         JLabel lbLogo = new JLabel("MedInfo");
         lbLogo.setFont(new Font("SansSerif", Font.BOLD, 28));
         lbLogo.setForeground(ControllerStyle.PRIMARY);
         
-        JLabel lbRole = new JLabel("Espace Secrétariat");
+        JLabel lbRole = new JLabel("Session : " + unUser.getRole());
         lbRole.setFont(new Font("SansSerif", Font.PLAIN, 14));
         lbRole.setForeground(ControllerStyle.TEXT_MUTED);
         
@@ -55,44 +56,47 @@ public class VueGenerale extends JFrame implements ActionListener {
         sidebar.add(sideHeader, BorderLayout.NORTH);
 
         // Menu de navigation
-        JPanel sideMenu = new JPanel(new GridLayout(8, 1, 0, 10)); // 8 lignes pour espacer
+        JPanel sideMenu = new JPanel();
+        sideMenu.setLayout(new BoxLayout(sideMenu, BoxLayout.Y_AXIS));
         sideMenu.setOpaque(false);
         sideMenu.setBorder(new EmptyBorder(0, 15, 0, 15));
 
-        // On applique le style à tous les boutons
-        JButton[] menuButtons = {btGestionRdv, btGestionCreneau, btListePatients, 
-                                 btListeMedecins, btAjouterPatient, btAjouterMedecin};
-        
-        for (JButton btn : menuButtons) {
-            ControllerStyle.applyPrimaryBtn(btn);
-            // On surcharge un peu pour que ce soit moins "massif" que les boutons de validation
-            btn.setHorizontalAlignment(SwingConstants.LEFT);
-            btn.setBackground(Color.WHITE);
-            btn.setForeground(ControllerStyle.TEXT_MAIN);
-            btn.setBorder(new EmptyBorder(10, 15, 10, 15));
+        // Liste des boutons à afficher
+        JButton[] tousLesBoutons = {
+            btMonProfil, // Profil en premier pour l'accessibilité
+            btListePatients, 
+            btListeMedecins, 
+            btAjouterPatient, 
+            btAjouterMedecin, 
+            btGestionRdv, 
+            btGestionCreneau
+        };
+
+        for (JButton btn : tousLesBoutons) {
+            configurerBouton(btn);
             sideMenu.add(btn);
+            sideMenu.add(Box.createRigidArea(new Dimension(0, 10)));
         }
 
         sidebar.add(sideMenu, BorderLayout.CENTER);
 
-        // Pied de Sidebar (Déconnexion)
+        // Footer Sidebar
         JPanel sideFooter = new JPanel(new BorderLayout());
         sideFooter.setOpaque(false);
         sideFooter.setBorder(new EmptyBorder(20, 15, 30, 15));
         
-        btDeconnexion.setBackground(ControllerStyle.PRIMARY_SOFT);
-        btDeconnexion.setForeground(ControllerStyle.DANGER);
         btDeconnexion.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btDeconnexion.setBorder(new MatteBorder(1, 1, 1, 1, ControllerStyle.DANGER));
+        btDeconnexion.setForeground(new Color(220, 53, 69));
+        btDeconnexion.setBackground(new Color(255, 245, 245));
+        btDeconnexion.setBorder(new MatteBorder(1, 1, 1, 1, new Color(220, 53, 69)));
         sideFooter.add(btDeconnexion, BorderLayout.SOUTH);
         
         sidebar.add(sideFooter, BorderLayout.SOUTH);
 
-        // --- 2. MAIN PANEL (Contenu à droite) ---
+        // --- 2. MAIN PANEL ---
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBackground(ControllerStyle.BG_ALT);
 
-        // Container pour le message de bienvenue
         JPanel welcomeBox = new JPanel();
         welcomeBox.setLayout(new BoxLayout(welcomeBox, BoxLayout.Y_AXIS));
         welcomeBox.setOpaque(false);
@@ -101,40 +105,54 @@ public class VueGenerale extends JFrame implements ActionListener {
         lbHello.setFont(new Font("SansSerif", Font.BOLD, 48));
         lbHello.setForeground(ControllerStyle.TEXT_MAIN);
         lbHello.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel lbSub = new JLabel("Que souhaitez-vous faire aujourd'hui ?");
-        lbSub.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        lbSub.setForeground(ControllerStyle.TEXT_MUTED);
-        lbSub.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lbSub.setBorder(new EmptyBorder(10, 0, 0, 0));
+        
+        JLabel lbBackyard = new JLabel("Application gérée par Le Backyard");
+        lbBackyard.setFont(new Font("SansSerif", Font.ITALIC, 14));
+        lbBackyard.setForeground(ControllerStyle.TEXT_MUTED);
+        lbBackyard.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         welcomeBox.add(lbHello);
-        welcomeBox.add(lbSub);
+        welcomeBox.add(Box.createRigidArea(new Dimension(0, 10)));
+        welcomeBox.add(lbBackyard);
+        
+        mainPanel.add(welcomeBox);
 
-        mainPanel.add(welcomeBox); // Centrage automatique via GridBagLayout
-
-        // Assemblage final
         this.add(sidebar, BorderLayout.WEST);
         this.add(mainPanel, BorderLayout.CENTER);
 
-        // Ecouteurs
         this.ajouterEcouteurs();
-
         this.setVisible(true);
+    }
+
+    private void configurerBouton(JButton btn) {
+        btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(ControllerStyle.TEXT_MAIN);
+        btn.setBorder(new EmptyBorder(12, 15, 12, 15));
+        btn.setFocusPainted(false);
+        btn.setMaximumSize(new Dimension(270, 45));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void ajouterEcouteurs() {
         JButton[] boutons = {btDeconnexion, btAjouterMedecin, btAjouterPatient, 
-                             btGestionRdv, btGestionCreneau, btListeMedecins, btListePatients};
+                             btGestionRdv, btGestionCreneau, btListeMedecins, 
+                             btListePatients, btMonProfil};
         for (JButton btn : boutons) {
             btn.addActionListener(this);
-            // Petit effet de survol simple
             btn.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    if (btn != btDeconnexion) btn.setBackground(ControllerStyle.PRIMARY_SOFT);
+                    if (btn != btDeconnexion) {
+                        btn.setBackground(ControllerStyle.PRIMARY_SOFT);
+                        btn.setForeground(ControllerStyle.PRIMARY);
+                    }
                 }
                 public void mouseExited(java.awt.event.MouseEvent evt) {
-                    if (btn != btDeconnexion) btn.setBackground(Color.WHITE);
+                    if (btn != btDeconnexion) {
+                        btn.setBackground(Color.WHITE);
+                        btn.setForeground(ControllerStyle.TEXT_MAIN);
+                    }
                 }
             });
         }
@@ -144,18 +162,19 @@ public class VueGenerale extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
 
-        // On ferme la vue actuelle pour les changements de page majeurs
-        if (source == btDeconnexion || source == btGestionRdv || 
-            source == btGestionCreneau || source == btListeMedecins || source == btListePatients) {
+        if (source == btDeconnexion) {
             this.dispose();
+            new VueConnexion();
+        } else if (source == btMonProfil) {
+            // Pas de dispose() ici pour pouvoir revenir au menu facilement
+            new VueProfilSecretaire(unUser);
+        } else {
+            if (source == btListePatients) { this.dispose(); new VueListePatients(unUser); }
+            else if (source == btListeMedecins) { this.dispose(); new VueListeMedecins(unUser); }
+            else if (source == btAjouterPatient) new VueAjouterPatient();
+            else if (source == btAjouterMedecin) new VueAjouterMedecin();
+            else if (source == btGestionCreneau) { this.dispose(); new VueGestionCreneau(unUser); }
+            else if (source == btGestionRdv) { this.dispose(); new VueGestionRdv(unUser); }
         }
-
-        if (source == btAjouterMedecin) new VueAjouterMedecin();
-        else if (source == btAjouterPatient) new VueAjouterPatient();
-        else if (source == btDeconnexion) new VueConnexion();
-        else if (source == btGestionRdv) new VueGestionRdv(unUser);
-        else if (source == btGestionCreneau) new VueGestionCreneau(unUser);
-        else if (source == btListeMedecins) new VueListeMedecins(unUser);
-        else if (source == btListePatients) new VueListePatients(unUser);
     }
 }
