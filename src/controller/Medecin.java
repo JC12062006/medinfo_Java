@@ -17,6 +17,7 @@ public class Medecin {
     private String prenom;
     private String email;
     private String telephone;
+    private String nomSpecialite;
 
     // -----------------------------
     // Constructeur utilisé à l'insertion
@@ -77,6 +78,7 @@ public class Medecin {
     public String getPrenom() { return prenom; }
     public String getEmail() { return email; }
     public String getTelephone() { return telephone; }
+    public String getNomSpecialite() { return nomSpecialite; }
 
     // -----------------------------
     // Setters
@@ -85,4 +87,5 @@ public class Medecin {
     public void setPrenom(String prenom) { this.prenom = prenom; }
     public void setEmail(String email) { this.email = email; }
     public void setTelephone(String telephone) { this.telephone = telephone; }
+    public void setNomSpecialite(String nomSpecialite) { this.nomSpecialite = nomSpecialite; }
 }
