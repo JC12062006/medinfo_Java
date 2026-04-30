@@ -42,13 +42,14 @@ public class ModelMedecin {
     // SELECT ALL
     // -----------------------------------------
     public static ArrayList<Medecin> selectAllMedecins() {
-
         ArrayList<Medecin> lesMedecins = new ArrayList<>();
 
+        // Requête modifiée avec une jointure sur la table specialite
         String requete =
-                "SELECT m.*, u.nom, u.prenom, u.email, u.telephone " +
-                        "FROM medecin m " +
-                        "INNER JOIN utilisateur u ON m.fk_id_utilisateur = u.id_utilisateur;";
+                "SELECT m.*, u.nom, u.prenom, u.email, u.telephone, s.libelle as specialite_nom " +
+                "FROM medecin m " +
+                "INNER JOIN utilisateur u ON m.fk_id_utilisateur = u.id_utilisateur " +
+                "INNER JOIN specialite s ON m.fk_id_specialite = s.id_specialite;";
 
         try {
             uneBdd.seConnecter();
@@ -56,7 +57,6 @@ public class ModelMedecin {
             ResultSet rs = unStat.executeQuery(requete);
 
             while (rs.next()) {
-
                 Medecin m = new Medecin(
                         rs.getString("rpps"),
                         rs.getInt("est_conventionne"),
@@ -68,22 +68,21 @@ public class ModelMedecin {
                         rs.getInt("fk_id_specialite")
                 );
 
-                // On complète les infos utilisateur
                 m.setNom(rs.getString("nom"));
                 m.setPrenom(rs.getString("prenom"));
                 m.setEmail(rs.getString("email"));
                 m.setTelephone(rs.getString("telephone"));
+                
+                // ON RÉCUPÈRE LE NOM DE LA SPÉCIALITÉ ICI
+                m.setNomSpecialite(rs.getString("specialite_nom"));
 
                 lesMedecins.add(m);
             }
-
             unStat.close();
             uneBdd.seDeconnecter();
-
         } catch (SQLException exp) {
             System.out.println("Erreur SQL : " + exp.getMessage());
         }
-
         return lesMedecins;
     }
 }

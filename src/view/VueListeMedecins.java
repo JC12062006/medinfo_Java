@@ -100,7 +100,10 @@ public class VueListeMedecins extends JFrame implements ActionListener {
             matrice[i][1] = m.getPrenom();
             matrice[i][2] = m.getEmail();
             matrice[i][3] = m.getTelephone();
-            matrice[i][4] = m.getFkIdSpecialite(); // Ici on affiche l'ID, tu pourras mapper le nom plus tard
+            
+            // REMPLACÉ : m.getFkIdSpecialite() par m.getNomSpecialite()
+            matrice[i][4] = m.getNomSpecialite(); 
+            
             i++;
         }
         return matrice;
