@@ -129,7 +129,7 @@ public class VueAjouterPatient extends JFrame implements ActionListener {
 
         if (e.getSource() == btValider) {
             if (txtNom.getText().isEmpty() || txtEmail.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Veuillez remplir au moins le nom et l'email.");
+                JOptionPane.showMessageDialog(this, "⚠️ Veuillez remplir au moins le nom et l'email.", "Champs manquants", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -147,10 +147,16 @@ public class VueAjouterPatient extends JFrame implements ActionListener {
                 cbSexe.getSelectedItem().toString()
             );
 
-            ControllerPatient.insertPatient(p);
+            // On récupère le retour de notre contrôleur
+            boolean success = ControllerPatient.insertPatient(p);
 
-            JOptionPane.showMessageDialog(this, "Patient enregistré avec succès !");
-            this.dispose();
+            if (success) {
+                JOptionPane.showMessageDialog(this, "✅ Patient enregistré avec succès !");
+                this.dispose();
+            } else {
+                // Si ça échoue, c'est probablement dû à une contrainte UNIQUE (email ou num_secu)
+                JOptionPane.showMessageDialog(this, "❌ Erreur : Impossible de créer le patient. \nVérifiez vos données (l'email ou le n° de sécurité sociale est peut-être déjà utilisé).", "Erreur d'insertion", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

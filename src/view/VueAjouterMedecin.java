@@ -168,8 +168,9 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
             this.dispose();
         }
 
-        if (e.getSource() == btValider) {
-            // Logique d'insertion identique à ton original
+if (e.getSource() == btValider) {
+            
+            // 1. Création de l'objet User
             User u = new User(
                 txtNom.getText(),
                 txtPrenom.getText(),
@@ -179,25 +180,40 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
                 txtDateNaissance.getText()
             );
 
+            // 2. Tentative d'insertion de l'utilisateur
             int idUser = ControllerUtilisateur.insertUtilisateur(u);
 
-            String item = cbxSpecialites.getSelectedItem().toString();
-            int idSpecialite = Integer.parseInt(item.split(" - ")[0]);
+            // Si idUser > 0, l'insertion de l'utilisateur a réussi
+            if (idUser > 0) {
+                
+                String item = cbxSpecialites.getSelectedItem().toString();
+                int idSpecialite = Integer.parseInt(item.split(" - ")[0]);
 
-            Medecin m = new Medecin(
-                txtRpps.getText(),
-                cbConventionne.isSelected() ? 1 : 0,
-                txtFormations.getText(),
-                txtLangues.getText(),
-                txtExperiences.getText(),
-                txtDescription.getText(),
-                idUser,
-                idSpecialite
-            );
+                Medecin m = new Medecin(
+                    txtRpps.getText(),
+                    cbConventionne.isSelected() ? 1 : 0,
+                    txtFormations.getText(),
+                    txtLangues.getText(),
+                    txtExperiences.getText(),
+                    txtDescription.getText(),
+                    idUser,
+                    idSpecialite
+                );
 
-            ControllerMedecin.insertMedecin(m);
-            JOptionPane.showMessageDialog(this, "Médecin ajouté avec succès !");
-            this.dispose();
+                // 3. Tentative d'insertion du médecin
+                boolean successMedecin = ControllerMedecin.insertMedecin(m);
+                
+                if (successMedecin) {
+                    JOptionPane.showMessageDialog(this, "✅ Médecin ajouté avec succès !");
+                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "❌ Erreur : L'utilisateur a été créé, mais l'enregistrement des données médicales a échoué.", "Erreur d'insertion", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            } else {
+                // Si idUser est 0, c'est que l'insertion Utilisateur a échoué (ex: email en doublon)
+                JOptionPane.showMessageDialog(this, "❌ Erreur : Impossible de créer l'utilisateur. Vérifiez le format de vos données.", "Erreur d'insertion", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

@@ -9,12 +9,16 @@ import controller.Medecin;
 
 public class ModelMedecin {
 
-    private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+    private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
     // -----------------------------------------
     // INSERTION
     // -----------------------------------------
-    public static void insertMedecin(Medecin m) {
+ // -----------------------------------------
+    // INSERTION
+    // -----------------------------------------
+    public static boolean insertMedecin(Medecin m) {
 
         String requete = "INSERT INTO medecin " +
                 "(rpps, est_conventionne, formations, langues_parlees, experiences, description, fk_id_utilisateur, fk_id_specialite) VALUES (" +
@@ -33,8 +37,12 @@ public class ModelMedecin {
             unStat.executeUpdate(requete);
             unStat.close();
             uneBdd.seDeconnecter();
+            
+            return true; // ✅ Retourne true si l'insertion a réussi
+            
         } catch (SQLException exp) {
-            System.out.println("Erreur d'exécution : " + requete);
+            System.out.println("Erreur d'exécution : " + exp.getMessage());
+            return false; // ❌ Retourne false en cas d'erreur
         }
     }
 

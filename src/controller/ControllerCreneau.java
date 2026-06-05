@@ -9,7 +9,7 @@ public class ControllerCreneau {
         return ModelCreneau.selectAllCreneaux(filtre);
     }
     
-    public static void genererPlanning(int idMedecin, int idSalle, String dateDebut, String dateFin, int dureeMinutes) {
-        ModelCreneau.genererPlanning(idMedecin, idSalle, dateDebut, dateFin, dureeMinutes);
+    public static boolean genererPlanning(int idMedecin, int idSalle, String dateDebut, String dateFin, int dureeMinutes) {
+        return ModelCreneau.genererPlanning(idMedecin, idSalle, dateDebut, dateFin, dureeMinutes);
     }
 }

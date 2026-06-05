@@ -23,8 +23,8 @@ public class VueGestionRdv extends JFrame implements ActionListener {
     private JTextField txtMotif = new JTextField(), txtFiltre = new JTextField();
     private JComboBox<String> cbxPatients = new JComboBox<>(), cbxStatut;
     private JButton btAnnuler = new JButton("Vider"), btModifier = new JButton("Enregistrer"), 
-                    btSupprimer = new JButton("Supprimer"), btRetour = new JButton("Menu"), 
-                    btFiltrer = new JButton("Rechercher");
+            btSupprimer = new JButton("Supprimer"), btRetour = new JButton("⬅ Retour"), 
+            btFiltrer = new JButton("Rechercher");
 
     private JTable tableRdv;
     private Tableau unTableau;
@@ -40,17 +40,33 @@ public class VueGestionRdv extends JFrame implements ActionListener {
         this.getContentPane().setBackground(BG_ALT);
         this.setLayout(new BorderLayout());
 
-        // --- 1. HEADER (Barre supérieure blanche) ---
+     // --- 1. HEADER (Barre supérieure blanche) ---
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setPreferredSize(new Dimension(0, 70));
         header.setBorder(new MatteBorder(0, 0, 1, 0, BORDER));
         
-        // Logo / Titre à gauche
-        JLabel title = new JLabel("  Gestion des Rendez-vous");
+        // Panel gauche (Bouton retour + Titre)
+        JPanel pnlGauche = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 18));
+        pnlGauche.setOpaque(false);
+        
+        // Styliser le bouton retour manuellement (car ControllerStyle n'est pas importé ici)
+        btRetour.setBackground(PRIMARY_SOFT);
+        btRetour.setForeground(PRIMARY);
+        btRetour.setFont(new Font("SansSerif", Font.BOLD, 12));
+        btRetour.setBorder(new EmptyBorder(8, 15, 8, 15));
+        btRetour.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Logo / Titre
+        JLabel title = new JLabel(" Gestion des Rendez-vous");
         title.setFont(new Font("SansSerif", Font.BOLD, 20));
         title.setForeground(PRIMARY);
-        header.add(title, BorderLayout.WEST);
+        
+        // Ajout au panel gauche
+        pnlGauche.add(btRetour);
+        pnlGauche.add(title);
+        
+        header.add(pnlGauche, BorderLayout.WEST);
 
         // Recherche à droite
         JPanel searchZone = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 18));
@@ -128,7 +144,6 @@ public class VueGestionRdv extends JFrame implements ActionListener {
         footer.setOpaque(false);
         lbNbRdv.setText("Total : " + unTableau.getRowCount() + " RDV enregistrés");
         footer.add(lbNbRdv, BorderLayout.WEST);
-        footer.add(btRetour, BorderLayout.EAST);
         main.add(footer, BorderLayout.SOUTH);
 
         this.add(main, BorderLayout.CENTER);

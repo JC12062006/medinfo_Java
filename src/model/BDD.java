@@ -38,12 +38,16 @@ public class BDD {
      */
     public void seConnecter() {
         this.chargerPilote();
-        String url = "jdbc:mysql://" + this.serveur + "/" + this.bdd + "?useSSL=false&serverTimezone=UTC";
+        // C'est toujours une bonne pratique de forcer le port 3306 dans l'URL par sécurité
+        String url = "jdbc:mysql://" + this.serveur + ":3306/" + this.bdd + "?useSSL=false&serverTimezone=UTC";
 
         try {
             this.maConnexion = DriverManager.getConnection(url, this.user, this.mdp);
+            System.out.println("Connexion réussie à la base distante !");
         } catch (SQLException exp) {
             System.out.println("Erreur de connexion à : " + url);
+            // AJOUTEZ CECI POUR COMPRENDRE POURQUOI ÇA PLANTE :
+            System.out.println("Cause de l'erreur : " + exp.getMessage()); 
         }
     }
 

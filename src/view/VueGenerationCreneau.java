@@ -182,11 +182,17 @@ public class VueGenerationCreneau extends JFrame implements ActionListener {
             String fullDebut = dDebut + ":00";
             String fullFin = dFin + ":00";
             
-            ControllerCreneau.genererPlanning(idM, idS, fullDebut, fullFin, dur);
+            // On récupère le résultat de l'opération
+            boolean success = ControllerCreneau.genererPlanning(idM, idS, fullDebut, fullFin, dur);
             
-            JOptionPane.showMessageDialog(this, "✅ Succès : Le planning a été créé.");
-            this.dispose();
-            new VueGestionCreneau(this.unUser);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "✅ Succès : Le planning a été créé.");
+                this.dispose();
+                new VueGestionCreneau(this.unUser);
+            } else {
+                // Affichage de l'erreur si la BDD a planté
+                JOptionPane.showMessageDialog(this, "❌ Erreur : Impossible de générer le planning. Vérifiez le format des données insérés.", "Erreur de génération", JOptionPane.ERROR_MESSAGE);
+            }
             
         } catch (NumberFormatException exp) {
             JOptionPane.showMessageDialog(this, "❌ Erreur : Seuls des nombres sont autorisés pour les ID et la durée.");

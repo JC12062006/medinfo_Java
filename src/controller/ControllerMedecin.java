@@ -5,8 +5,9 @@ import model.ModelMedecin;
 
 public class ControllerMedecin {
 
-    public static void insertMedecin(Medecin unMedecin) {
-        ModelMedecin.insertMedecin(unMedecin);
+    // Changement de void en boolean
+    public static boolean insertMedecin(Medecin unMedecin) {
+        return ModelMedecin.insertMedecin(unMedecin);
     }
 
     public static ArrayList<Medecin> selectAllMedecins() {

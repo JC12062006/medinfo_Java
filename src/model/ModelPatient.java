@@ -10,7 +10,8 @@ import controller.Patient;
 
 public class ModelPatient extends ModelUtilisateur {
 
-    private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+    private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
    public static ArrayList<Patient> selectAllPatientsFiltre(String filtre) {
 	    	
@@ -37,7 +38,8 @@ public class ModelPatient extends ModelUtilisateur {
 	
 	            while (desResultats.next()) {
 					Patient unPatient = new Patient(desResultats.getString("nom"),
-							desResultats.getString("prenom"), desResultats.getInt("id_patient"));
+							desResultats.getString("prenom"), desResultats.getInt("id_patient"), 
+							desResultats.getString("email"), desResultats.getString("telephone"));
 					
 					//ajout de la promotion dans l'ArrayList
 					lesPatients.add(unPatient);
@@ -54,7 +56,7 @@ public class ModelPatient extends ModelUtilisateur {
 	        return lesPatients;
 	    }
   
-   public static void insertPatient(Patient p) {
+    public static boolean insertPatient(Patient p) {
 	    // 1ère requête : Insérer les données générales dans Utilisateur
 	    String requeteUtilisateur = "INSERT INTO utilisateur " +
 	            "(nom, prenom, email, hash_password, telephone, role, date_naissance) VALUES (" +
@@ -68,7 +70,6 @@ public class ModelPatient extends ModelUtilisateur {
 
 	    try {
 	        uneBdd.seConnecter();
-	        // Préparer le statement en lui demandant de nous renvoyer les clés générées (l'Auto-Increment)
 	        Statement unStat = uneBdd.getMaConnexion().createStatement();
 	        
 	        // Exécution de l'insertion de l'utilisateur
@@ -79,13 +80,13 @@ public class ModelPatient extends ModelUtilisateur {
 	        int nouvelIdUtilisateur = 0;
 	        
 	        if (rs.next()) {
-	            nouvelIdUtilisateur = rs.getInt(1); // On récupère l'ID
-	            p.setFkIdUtilisateur(nouvelIdUtilisateur); // On met à jour notre objet
+	            nouvelIdUtilisateur = rs.getInt(1); 
+	            p.setFkIdUtilisateur(nouvelIdUtilisateur); 
 	        }
 	        
-	        // Si l'utilisateur a bien été inséré et qu'on a son ID
+	        // Si l'utilisateur a bien été inséré
 	        if(nouvelIdUtilisateur > 0) {
-	            // 2ème requête : Insérer les données spécifiques dans Patient avec la clé étrangère
+	            // 2ème requête : Insérer les données spécifiques dans Patient
 	            String requetePatient = "INSERT INTO patient " +
 	                    "(adresse, num_secu, sexe, fk_id_utilisateur) VALUES (" +
 	                    "'" + p.getAdresse() + "', " +
@@ -93,16 +94,20 @@ public class ModelPatient extends ModelUtilisateur {
 	                    "'" + p.getSexe() + "', " +
 	                    nouvelIdUtilisateur + ");";
 	            
-	            int lignes = unStat.executeUpdate(requetePatient);
-	            System.out.println(">>> Utilisateur et Patient insérés avec succès !");
+	            unStat.executeUpdate(requetePatient);
+	            
+	            unStat.close();
+	            uneBdd.seDeconnecter();
+	            return true; // ✅ Succès total
 	        }
 
 	        unStat.close();
 	        uneBdd.seDeconnecter();
+	        return false; // ❌ L'ID n'a pas été généré
 
 	    } catch (SQLException exp) {
 	        System.out.println("Erreur SQL : " + exp.getMessage());
-	        System.out.println("Requête : " + requeteUtilisateur);
+	        return false; // ❌ Erreur SQL (ex: email ou n° sécu en doublon)
 	    }
 	}
 }

@@ -21,6 +21,19 @@ public class Patient extends User{
 		this.fkIdUtilisateur = idUtilisateur;
 	}
 	
+	// Constructeur liste Patients
+public Patient(String nom, String prenom, int idPatient, String mail, String telephone){
+		
+		super(nom, prenom, mail, telephone);
+		
+		this.idPatient = idPatient;
+		this.fkIdUtilisateur = 0;
+		this.adresse = "";
+		this.numSecu = "";
+		this.sexe = "";
+	}
+
+	
 	//Constructeur pour les patients combobox
 	public Patient(String nom, String prenom, int idPatient){
 		

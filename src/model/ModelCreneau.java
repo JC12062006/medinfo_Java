@@ -10,8 +10,9 @@ import controller.Creneau;
 
 public class ModelCreneau {
 	
+	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
 
-	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+	private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
 	public static ArrayList<Creneau> selectAllCreneaux(String filtre) {
     
@@ -91,7 +92,7 @@ public class ModelCreneau {
 
 	}
 
-	public static void genererPlanning(int idMedecin, int idSalle, String dateDebut, String dateFin, int dureeMinutes) {
+	public static boolean genererPlanning(int idMedecin, int idSalle, String dateDebut, String dateFin, int dureeMinutes) {
 	    String requete = "{call generer_planning_medecin(?, ?, ?, ?, ?)}";
 	    
 	    try {
@@ -112,8 +113,11 @@ public class ModelCreneau {
 	        unStat.close();
 	        uneBdd.seDeconnecter();
 	        
+	        return true;
+	        
 	    } catch (SQLException exp) {
-	        System.out.println("Erreur lors de la génération du planning : " + exp.getMessage());
+	        System.out.println("Erreur d'exécution : " + exp.getMessage());
+	        return false; // ❌ Retourne false en cas d'erreur (ex: problème de clé étrangère, BDD injoignable)
 	    }
 	}
 }

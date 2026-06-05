@@ -43,6 +43,18 @@ public class User {
         this.role = "Secretaire";
     }
     
+    // Constructeur liste patients
+    public User(String nom, String prenom, String email, String telephone) {
+    	this.idUtilisateur = 0;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
+        this.telephone = telephone;
+        this.hashPassword = "";
+        this.dateNaissance = "";
+        this.role = "Patient";
+    }
+    
     //constructeur combobox patients
     public User(String nom, String prenom) {
     	this.idUtilisateur = 0;
