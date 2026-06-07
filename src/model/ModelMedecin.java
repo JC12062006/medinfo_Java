@@ -9,8 +9,8 @@ import controller.Medecin;
 
 public class ModelMedecin {
 
-	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
-    private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
+	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+    //private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
     // -----------------------------------------
     // INSERTION

@@ -10,8 +10,8 @@ import controller.User;
 
 public class ModelUtilisateur {
 
-	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
-    private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
+	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+    //private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
     public static String sha1(String input) {
         try {

@@ -29,6 +29,7 @@ public class VueGestionRdv extends JFrame implements ActionListener {
     private JTable tableRdv;
     private Tableau unTableau;
     private JLabel lbNbRdv = new JLabel();
+    private ArrayList<Rdv> lesRdvActuels;
     private ArrayList<Patient> tousLesPatients;
 
     public VueGestionRdv(User unUser) {
@@ -96,7 +97,7 @@ public class VueGestionRdv extends JFrame implements ActionListener {
         ajouterChamp(sidebar, "PATIENT", cbxPatients, g, 0);
         cbxPatients.setEditable(true);
         
-        ajouterChamp(sidebar, "STATUT", cbxStatut = new JComboBox<>(new String[]{"Sélectionner...", "À Confirmer", "Confirmé", "Annulé", "Honoré"}), g, 2);
+        ajouterChamp(sidebar, "STATUT", cbxStatut = new JComboBox<>(new String[]{"Sélectionner...", "a_confirmer", "confirmé", "annulé", "honoré"}), g, 2);
         ajouterChamp(sidebar, "MOTIF", txtMotif, g, 4);
 
         // Boutons d'action
@@ -183,9 +184,16 @@ public class VueGestionRdv extends JFrame implements ActionListener {
         JTextField ed = (JTextField) cbxPatients.getEditor().getEditorComponent();
         ed.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_ENTER) return;
+                // Ignorer les touches Entrée, Échap et les flèches directionnelles
+                int key = e.getKeyCode();
+                if(key == KeyEvent.VK_ENTER || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN || key == KeyEvent.VK_ESCAPE) {
+                    return;
+                }
+                
                 rafraichirCbxPatients(ed.getText());
-                if(cbxPatients.getItemCount() > 0) cbxPatients.showPopup();
+                if(cbxPatients.getItemCount() > 0) {
+                    cbxPatients.showPopup();
+                }
             }
         });
     }
@@ -193,19 +201,38 @@ public class VueGestionRdv extends JFrame implements ActionListener {
     // --- Méthodes métier ---
 
     public void rafraichirCbxPatients(String filtre) {
+        JTextField ed = (JTextField) cbxPatients.getEditor().getEditorComponent();
+        
+        // 1. On sauvegarde le texte actuel et la position du curseur
+        String texteSaisi = ed.getText();
+        int positionCurseur = ed.getCaretPosition();
+        
+        // 2. On vide et on remplit la liste
         cbxPatients.removeAllItems();
         String f = filtre.toLowerCase();
         for (Patient p : this.tousLesPatients) {
             String aff = p.getIdPatient() + " - " + p.getNom() + " " + p.getPrenom();
-            if (filtre.isEmpty() || aff.toLowerCase().contains(f)) cbxPatients.addItem(aff);
+            if (filtre.isEmpty() || aff.toLowerCase().contains(f)) {
+                cbxPatients.addItem(aff);
+            }
+        }
+        
+        // 3. On force la remise du texte de l'utilisateur (pour annuler l'écrasement natif de Swing)
+        ed.setText(texteSaisi);
+        
+        // On replace le curseur au bon endroit (sinon il retourne à la position 0)
+        if (positionCurseur <= texteSaisi.length()) {
+            ed.setCaretPosition(positionCurseur);
         }
     }
 
     public Object [][] obtenirDonnees(String filtre){
-        ArrayList<Rdv> lesRdv = ControllerRdv.selectAllRdv(filtre);
-        Object matrice [][] = new Object[lesRdv.size()] [6];
+        // On sauvegarde la liste des RDV dans notre variable de classe
+        this.lesRdvActuels = ControllerRdv.selectAllRdv(filtre); 
+        
+        Object matrice [][] = new Object[this.lesRdvActuels.size()] [6];
         int i = 0;
-        for (Rdv r : lesRdv) {
+        for (Rdv r : this.lesRdvActuels) {
             matrice[i][0] = r.getIdRdv();
             matrice[i][1] = r.getMotif();
             matrice[i][2] = r.getOrigine();
@@ -231,17 +258,48 @@ public class VueGestionRdv extends JFrame implements ActionListener {
 
     public void updateRdv() {
         int l = tableRdv.getSelectedRow();
+        if (l == -1) return; // Sécurité si aucun RDV n'est cliqué
+
         int id = Integer.parseInt(unTableau.getValueAt(l, 0).toString());
         String m = txtMotif.getText();
         String s = cbxStatut.getSelectedItem().toString();
         String p = cbxPatients.getSelectedItem().toString();
-        if (m.isEmpty() || s.contains("Sélect") || !p.contains("-")) return;
+        
+        if (m.isEmpty() || s.contains("Sélect") || !p.contains("-")) {
+            JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs correctement.", "Erreur", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         
         int idPatient = Integer.parseInt(p.split(" - ")[0]);
-        Rdv r = new Rdv(id, idPatient, 1, java.time.LocalDateTime.now(), m, s, "Cabinet", "", "");        
-        ControllerRdv.updateRdv(r);
-        unTableau.setDonnees(obtenirDonnees(""));
-        viderChamps();
+
+        // 1. Retrouver le RDV d'origine dans notre liste
+        Rdv rdvOriginal = null;
+        for (Rdv r : this.lesRdvActuels) {
+            if (r.getIdRdv() == id) {
+                rdvOriginal = r;
+                break;
+            }
+        }
+
+        // 2. Mettre à jour avec les bonnes données
+        if (rdvOriginal != null) {
+            Rdv r = new Rdv(
+                id, 
+                idPatient, 
+                rdvOriginal.getFkIdCreneau(), // On conserve le VRAI créneau (fini le 1 en dur !)
+                rdvOriginal.getDateCreation(), 
+                m, 
+                s, 
+                rdvOriginal.getOrigine(),     // On conserve l'origine ("Doctolib", "Sur place", etc.)
+                "", 
+                ""
+            );        
+            
+            ControllerRdv.updateRdv(r);
+            unTableau.setDonnees(obtenirDonnees("")); // Rafraîchit le tableau
+            lbNbRdv.setText("Total : " + unTableau.getRowCount() + " RDV enregistrés");
+            viderChamps();
+        }
     }
 
     public void deleteRdv() {

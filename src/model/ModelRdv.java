@@ -11,8 +11,8 @@ import controller.Rdv;
 
 public class ModelRdv {
 	
-	// 	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
-	private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
+	private static BDD uneBdd = new BDD("localhost", "root", "", "medinfo");
+	//private static BDD uneBdd = new BDD("192.168.20.110", "clientProd", "password75", "medinfo");
 
 	public static void executerRequete(String requete) {
 	

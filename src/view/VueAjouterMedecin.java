@@ -30,7 +30,7 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 
     public VueAjouterMedecin() {
         this.setTitle("MedInfo - Nouveau Médecin");
-        this.setSize(650, 900); // Fenêtre haute pour accommoder le formulaire complet
+        this.setSize(650, 800); // Fenêtre haute pour accommoder le formulaire complet
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
@@ -171,18 +171,20 @@ public class VueAjouterMedecin extends JFrame implements ActionListener {
 if (e.getSource() == btValider) {
             
             // 1. Création de l'objet User
-            User u = new User(
-                txtNom.getText(),
-                txtPrenom.getText(),
-                txtEmail.getText(),
-                txtTelephone.getText(),
-                ModelUtilisateur.sha1("123"),
-                txtDateNaissance.getText()
-            );
+			User u = new User(
+				    txtNom.getText(),
+				    txtPrenom.getText(),
+				    txtEmail.getText(),
+				    txtTelephone.getText(),
+				    ModelUtilisateur.sha1("123"),
+				    txtDateNaissance.getText()
+				);
+			
+			u.setRole("Medecin");
 
             // 2. Tentative d'insertion de l'utilisateur
-            int idUser = ControllerUtilisateur.insertUtilisateur(u);
-
+			int idUser = ControllerUtilisateur.insertUtilisateur(u);
+			
             // Si idUser > 0, l'insertion de l'utilisateur a réussi
             if (idUser > 0) {
                 

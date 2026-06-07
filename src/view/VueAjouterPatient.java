@@ -25,7 +25,7 @@ public class VueAjouterPatient extends JFrame implements ActionListener {
 
     public VueAjouterPatient() {
         this.setTitle("MedInfo - Nouveau Patient");
-        this.setSize(600, 850); // Fenêtre haute pour accommoder tous les champs
+        this.setSize(600, 800); // Fenêtre haute pour accommoder tous les champs
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
